@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum MatchStage {
+  LEAGUE
+  QUALIFIER_1
+  ELIMINATOR
+  QUALIFIER_2
+  FINAL
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LOCKED
+  LIVE
+  COMPLETED
+  ABANDONED
+  NO_RESULT
+}
+
+enum PredictionsRevealMode {
+  AFTER_CUTOFF
+  AFTER_MATCH_START
+  AFTER_SETTLEMENT
+}
+
+model User {
+  id            String           @id @default(cuid())
+  googleId      String?          @unique
+  email         String?          @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  role          UserRole         @default(USER)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  memberships   RoomMembership[]
+  predictions   Prediction[]
+  auditLogs     AuditLog[]       @relation("AuditActor")
+}
+
+model Room {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  name        String
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  memberships RoomMembership[]
+  predictions Prediction[]
+}
+
+model RoomMembership {
+  id       String   @id @default(cuid())
+  roomId   String
+  userId   String
+  joinedAt DateTime @default(now())
+  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@index([userId])
+  @@index([joinedAt])
+}
+
+model Team {
+  id             String       @id @default(cuid())
+  shortCode      String       @unique
+  name           String
+  logoUrl        String?
+  primaryColor   String?
+  secondaryColor String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  matchesAsTeamA Match[]      @relation("MatchTeamA")
+  matchesAsTeamB Match[]      @relation("MatchTeamB")
+  wins           Match[]      @relation("WinningTeam")
+  predictions    Prediction[]
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  externalRef   String?     @unique
+  season        Int         @default(2026)
+  matchNumber   Int?
+  stage         MatchStage  @default(LEAGUE)
+  teamAId       String
+  teamBId       String
+  venue         String?
+  city          String?
+  startTimeUtc  DateTime
+  cutoffTimeUtc DateTime
+  status        MatchStatus @default(SCHEDULED)
+  winningTeamId String?
+  settledAt     DateTime?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  teamA         Team        @relation("MatchTeamA", fields: [teamAId], references: [id], onDelete: Restrict)
+  teamB         Team        @relation("MatchTeamB", fields: [teamBId], references: [id], onDelete: Restrict)
+  winningTeam   Team?       @relation("WinningTeam", fields: [winningTeamId], references: [id], onDelete: SetNull)
+  predictions   Prediction[]
+
+  @@index([startTimeUtc])
+  @@index([status])
+}
+
+model Prediction {
+  id               String   @id @default(cuid())
+  roomId           String
+  userId           String
+  matchId          String
+  predictedTeamId  String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  submittedAt      DateTime @default(now())
+  isLockedSnapshot Boolean  @default(false)
+  room             Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  match            Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  predictedTeam    Team     @relation(fields: [predictedTeamId], references: [id], onDelete: Restrict)
+
+  @@unique([roomId, userId, matchId])
+  @@index([matchId])
+  @@index([userId])
+  @@index([roomId])
+}
+
+model AppConfig {
+  id                    String                @id @default("singleton")
+  defaultCutoffMinutes  Int                   @default(60)
+  allowlistEnabled      Boolean               @default(false)
+  predictionsRevealMode PredictionsRevealMode @default(AFTER_CUTOFF)
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model AllowedEmail {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  action      String
+  entityType  String
+  entityId    String
+  payload     Json?
+  createdAt   DateTime @default(now())
+  actorUser   User?    @relation("AuditActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([actorUserId])
+  @@index([entityType, entityId])
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@unique([token])
+}

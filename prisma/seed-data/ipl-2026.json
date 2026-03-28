@@ -1,0 +1,853 @@
+{
+  "season": 2026,
+  "sources": [
+    "https://www.iplt20.com/matches/fixtures",
+    "https://www.iplt20.com/news/4249/bcci-announces-schedule-for-first-phase-of-tata-ipl-2026",
+    "https://www.iplt20.com/news/4256/bcci-announces-schedule-for-second-phase-of-tata-ipl-2026",
+    "https://ipl-stats-sports-mechanic.s3.ap-south-1.amazonaws.com/ipl/feeds/284-matchschedule.js"
+  ],
+  "teams": [
+    {
+      "shortCode": "CSK",
+      "name": "Chennai Super Kings",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/CSK.png",
+      "primaryColor": "#F7C600",
+      "secondaryColor": "#0B2E6D"
+    },
+    {
+      "shortCode": "DC",
+      "name": "Delhi Capitals",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/DC.png",
+      "primaryColor": "#1D428A",
+      "secondaryColor": "#EF3340"
+    },
+    {
+      "shortCode": "GT",
+      "name": "Gujarat Titans",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/Rwz7jmxIFN1774445093GT.png",
+      "primaryColor": "#0B163F",
+      "secondaryColor": "#A9894D"
+    },
+    {
+      "shortCode": "KKR",
+      "name": "Kolkata Knight Riders",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/KKR.png",
+      "primaryColor": "#3A225D",
+      "secondaryColor": "#D4AF37"
+    },
+    {
+      "shortCode": "LSG",
+      "name": "Lucknow Super Giants",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/b7GnGJW4bi1772703245LSG.png",
+      "primaryColor": "#00AEEF",
+      "secondaryColor": "#F37D20"
+    },
+    {
+      "shortCode": "MI",
+      "name": "Mumbai Indians",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/MI.png",
+      "primaryColor": "#004BA0",
+      "secondaryColor": "#D1AB3E"
+    },
+    {
+      "shortCode": "PBKS",
+      "name": "Punjab Kings",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/PBKS.png",
+      "primaryColor": "#D71920",
+      "secondaryColor": "#B0B7BC"
+    },
+    {
+      "shortCode": "RCB",
+      "name": "Royal Challengers Bengaluru",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/NVAlbtIyB81740555172aFPMviEPyJ1710927747rcb.png",
+      "primaryColor": "#B11116",
+      "secondaryColor": "#0A0A0A"
+    },
+    {
+      "shortCode": "RR",
+      "name": "Rajasthan Royals",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/sSNjJEkBAx1742900310RR---New-Logo.png",
+      "primaryColor": "#EA1A85",
+      "secondaryColor": "#1B2A59"
+    },
+    {
+      "shortCode": "SRH",
+      "name": "Sunrisers Hyderabad",
+      "logoUrl": "https://scores.iplt20.com/ipl/teamlogos/SRH.png",
+      "primaryColor": "#F26522",
+      "secondaryColor": "#111827"
+    }
+  ],
+  "matches": [
+    {
+      "externalRef": "2417",
+      "season": 2026,
+      "matchNumber": 1,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "SRH",
+      "venue": "M Chinnaswamy Stadium",
+      "city": "Bengaluru",
+      "startTimeUtc": "2026-03-28T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2418",
+      "season": 2026,
+      "matchNumber": 2,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "KKR",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-03-29T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2419",
+      "season": 2026,
+      "matchNumber": 3,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "CSK",
+      "venue": "ACA Stadium",
+      "city": "Guwahati",
+      "startTimeUtc": "2026-03-30T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2420",
+      "season": 2026,
+      "matchNumber": 4,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "GT",
+      "venue": "New International Cricket Stadium",
+      "city": "New Chandigarh",
+      "startTimeUtc": "2026-03-31T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2421",
+      "season": 2026,
+      "matchNumber": 5,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "DC",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-04-01T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2422",
+      "season": 2026,
+      "matchNumber": 6,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "SRH",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-04-02T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2423",
+      "season": 2026,
+      "matchNumber": 7,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "PBKS",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-04-03T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2424",
+      "season": 2026,
+      "matchNumber": 8,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "MI",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-04-04T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2425",
+      "season": 2026,
+      "matchNumber": 9,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "RR",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-04-04T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2426",
+      "season": 2026,
+      "matchNumber": 10,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "LSG",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-04-05T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2427",
+      "season": 2026,
+      "matchNumber": 11,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "CSK",
+      "venue": "M Chinnaswamy Stadium",
+      "city": "Bengaluru",
+      "startTimeUtc": "2026-04-05T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2428",
+      "season": 2026,
+      "matchNumber": 12,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "PBKS",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-04-06T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2429",
+      "season": 2026,
+      "matchNumber": 13,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "MI",
+      "venue": "ACA Stadium",
+      "city": "Guwahati",
+      "startTimeUtc": "2026-04-07T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2430",
+      "season": 2026,
+      "matchNumber": 14,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "GT",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-04-08T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2431",
+      "season": 2026,
+      "matchNumber": 15,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "LSG",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-04-09T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2432",
+      "season": 2026,
+      "matchNumber": 16,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "RCB",
+      "venue": "ACA Stadium",
+      "city": "Guwahati",
+      "startTimeUtc": "2026-04-10T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2433",
+      "season": 2026,
+      "matchNumber": 17,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "SRH",
+      "venue": "New International Cricket Stadium",
+      "city": "New Chandigarh",
+      "startTimeUtc": "2026-04-11T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2434",
+      "season": 2026,
+      "matchNumber": 18,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "DC",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-04-11T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2435",
+      "season": 2026,
+      "matchNumber": 19,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "GT",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-04-12T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2436",
+      "season": 2026,
+      "matchNumber": 20,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "RCB",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-04-12T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2461",
+      "season": 2026,
+      "matchNumber": 21,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "RR",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-04-13T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2462",
+      "season": 2026,
+      "matchNumber": 22,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "KKR",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-04-14T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2463",
+      "season": 2026,
+      "matchNumber": 23,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "LSG",
+      "venue": "M Chinnaswamy Stadium",
+      "city": "Bengaluru",
+      "startTimeUtc": "2026-04-15T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2464",
+      "season": 2026,
+      "matchNumber": 24,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "PBKS",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-04-16T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2465",
+      "season": 2026,
+      "matchNumber": 25,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "KKR",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-04-17T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2466",
+      "season": 2026,
+      "matchNumber": 26,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "DC",
+      "venue": "M Chinnaswamy Stadium",
+      "city": "Bengaluru",
+      "startTimeUtc": "2026-04-18T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2467",
+      "season": 2026,
+      "matchNumber": 27,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "CSK",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-04-18T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2468",
+      "season": 2026,
+      "matchNumber": 28,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "RR",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-04-19T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2469",
+      "season": 2026,
+      "matchNumber": 29,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "LSG",
+      "venue": "New International Cricket Stadium",
+      "city": "New Chandigarh",
+      "startTimeUtc": "2026-04-19T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2470",
+      "season": 2026,
+      "matchNumber": 30,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "MI",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-04-20T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2471",
+      "season": 2026,
+      "matchNumber": 31,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "DC",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-04-21T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2472",
+      "season": 2026,
+      "matchNumber": 32,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "RR",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-04-22T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2473",
+      "season": 2026,
+      "matchNumber": 33,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "CSK",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-04-23T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2474",
+      "season": 2026,
+      "matchNumber": 34,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "GT",
+      "venue": "M Chinnaswamy Stadium",
+      "city": "Bengaluru",
+      "startTimeUtc": "2026-04-24T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2475",
+      "season": 2026,
+      "matchNumber": 35,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "PBKS",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-04-25T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2476",
+      "season": 2026,
+      "matchNumber": 36,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "SRH",
+      "venue": "Sawai Mansingh Stadium",
+      "city": "Jaipur",
+      "startTimeUtc": "2026-04-25T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2477",
+      "season": 2026,
+      "matchNumber": 37,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "CSK",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-04-26T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2478",
+      "season": 2026,
+      "matchNumber": 38,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "KKR",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-04-26T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2479",
+      "season": 2026,
+      "matchNumber": 39,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "RCB",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-04-27T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2480",
+      "season": 2026,
+      "matchNumber": 40,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "RR",
+      "venue": "New International Cricket Stadium",
+      "city": "New Chandigarh",
+      "startTimeUtc": "2026-04-28T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2481",
+      "season": 2026,
+      "matchNumber": 41,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "SRH",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-04-29T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2482",
+      "season": 2026,
+      "matchNumber": 42,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "RCB",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-04-30T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2483",
+      "season": 2026,
+      "matchNumber": 43,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "DC",
+      "venue": "Sawai Mansingh Stadium",
+      "city": "Jaipur",
+      "startTimeUtc": "2026-05-01T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2484",
+      "season": 2026,
+      "matchNumber": 44,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "MI",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-05-02T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2485",
+      "season": 2026,
+      "matchNumber": 45,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "KKR",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-05-03T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2486",
+      "season": 2026,
+      "matchNumber": 46,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "PBKS",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-05-03T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2487",
+      "season": 2026,
+      "matchNumber": 47,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "LSG",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-05-04T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2488",
+      "season": 2026,
+      "matchNumber": 48,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "CSK",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-05-05T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2489",
+      "season": 2026,
+      "matchNumber": 49,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "PBKS",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-05-06T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2490",
+      "season": 2026,
+      "matchNumber": 50,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "RCB",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-05-07T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2491",
+      "season": 2026,
+      "matchNumber": 51,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "KKR",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-05-08T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2492",
+      "season": 2026,
+      "matchNumber": 52,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "GT",
+      "venue": "Sawai Mansingh Stadium",
+      "city": "Jaipur",
+      "startTimeUtc": "2026-05-09T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2493",
+      "season": 2026,
+      "matchNumber": 53,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "LSG",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-05-10T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2494",
+      "season": 2026,
+      "matchNumber": 54,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "MI",
+      "venue": "Shaheed Veer Narayan Singh International Cricket Stadium",
+      "city": "Raipur",
+      "startTimeUtc": "2026-05-10T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2495",
+      "season": 2026,
+      "matchNumber": 55,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "DC",
+      "venue": "Himachal Pradesh Cricket Association Stadium",
+      "city": "Dharamshala",
+      "startTimeUtc": "2026-05-11T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2496",
+      "season": 2026,
+      "matchNumber": 56,
+      "stage": "LEAGUE",
+      "teamAShortCode": "GT",
+      "teamBShortCode": "SRH",
+      "venue": "Narendra Modi Stadium",
+      "city": "Ahmedabad",
+      "startTimeUtc": "2026-05-12T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2497",
+      "season": 2026,
+      "matchNumber": 57,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RCB",
+      "teamBShortCode": "KKR",
+      "venue": "Shaheed Veer Narayan Singh International Cricket Stadium",
+      "city": "Raipur",
+      "startTimeUtc": "2026-05-13T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2498",
+      "season": 2026,
+      "matchNumber": 58,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "MI",
+      "venue": "Himachal Pradesh Cricket Association Stadium",
+      "city": "Dharamshala",
+      "startTimeUtc": "2026-05-14T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2499",
+      "season": 2026,
+      "matchNumber": 59,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "CSK",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-05-15T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2500",
+      "season": 2026,
+      "matchNumber": 60,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "GT",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-05-16T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2501",
+      "season": 2026,
+      "matchNumber": 61,
+      "stage": "LEAGUE",
+      "teamAShortCode": "PBKS",
+      "teamBShortCode": "RCB",
+      "venue": "Himachal Pradesh Cricket Association Stadium",
+      "city": "Dharamshala",
+      "startTimeUtc": "2026-05-17T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2502",
+      "season": 2026,
+      "matchNumber": 62,
+      "stage": "LEAGUE",
+      "teamAShortCode": "DC",
+      "teamBShortCode": "RR",
+      "venue": "Arun Jaitley Stadium",
+      "city": "Delhi",
+      "startTimeUtc": "2026-05-17T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2503",
+      "season": 2026,
+      "matchNumber": 63,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "SRH",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-05-18T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2504",
+      "season": 2026,
+      "matchNumber": 64,
+      "stage": "LEAGUE",
+      "teamAShortCode": "RR",
+      "teamBShortCode": "LSG",
+      "venue": "Sawai Mansingh Stadium",
+      "city": "Jaipur",
+      "startTimeUtc": "2026-05-19T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2505",
+      "season": 2026,
+      "matchNumber": 65,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "MI",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-05-20T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2506",
+      "season": 2026,
+      "matchNumber": 66,
+      "stage": "LEAGUE",
+      "teamAShortCode": "CSK",
+      "teamBShortCode": "GT",
+      "venue": "MA Chidambaram Stadium",
+      "city": "Chennai",
+      "startTimeUtc": "2026-05-21T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2507",
+      "season": 2026,
+      "matchNumber": 67,
+      "stage": "LEAGUE",
+      "teamAShortCode": "SRH",
+      "teamBShortCode": "RCB",
+      "venue": "Rajiv Gandhi International Stadium",
+      "city": "Hyderabad",
+      "startTimeUtc": "2026-05-22T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2508",
+      "season": 2026,
+      "matchNumber": 68,
+      "stage": "LEAGUE",
+      "teamAShortCode": "LSG",
+      "teamBShortCode": "PBKS",
+      "venue": "Bharat Ratna Shri Atal Bihari Vajpayee Ekana Cricket Stadium",
+      "city": "Lucknow",
+      "startTimeUtc": "2026-05-23T14:00:00.000Z"
+    },
+    {
+      "externalRef": "2509",
+      "season": 2026,
+      "matchNumber": 69,
+      "stage": "LEAGUE",
+      "teamAShortCode": "MI",
+      "teamBShortCode": "RR",
+      "venue": "Wankhede Stadium",
+      "city": "Mumbai",
+      "startTimeUtc": "2026-05-24T10:00:00.000Z"
+    },
+    {
+      "externalRef": "2510",
+      "season": 2026,
+      "matchNumber": 70,
+      "stage": "LEAGUE",
+      "teamAShortCode": "KKR",
+      "teamBShortCode": "DC",
+      "venue": "Eden Gardens",
+      "city": "Kolkata",
+      "startTimeUtc": "2026-05-24T14:00:00.000Z"
+    }
+  ]
+}
