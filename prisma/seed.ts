@@ -16,54 +16,59 @@ import {
   getDefaultCutoffMinutes,
   getPrivateRoomCode,
 } from "../src/lib/env";
+import { slugifyRoomName } from "../src/lib/rooms";
 import { calculateCutoffTime } from "../src/lib/time";
 
 async function main() {
   const privateRoomCode = getPrivateRoomCode();
   const defaultCutoffMinutes = getDefaultCutoffMinutes();
   const adminEmails = [...getAdminEmails()];
+  const defaultRoomName = `${APP_NAME} · ${SINGLE_ROOM_NAME}`;
 
   const existingRoom = await db.room.findFirst({
     orderBy: { createdAt: "asc" },
   });
 
-  const room = existingRoom
-    ? await db.room.update({
-        where: { id: existingRoom.id },
-        data: {
-          code: privateRoomCode,
-          name: `${APP_NAME} · ${SINGLE_ROOM_NAME}`,
-          isActive: true,
-        },
-      })
-    : await db.room.create({
-        data: {
-          code: privateRoomCode,
-          name: `${APP_NAME} · ${SINGLE_ROOM_NAME}`,
-          isActive: true,
-        },
-      });
+  const room =
+    existingRoom ??
+    (await db.room.create({
+      data: {
+        code: privateRoomCode,
+        slug: slugifyRoomName(SINGLE_ROOM_NAME),
+        name: defaultRoomName,
+        isActive: true,
+        allowlistEnabled: getAllowlistEnabledDefault(),
+      },
+    }));
 
   await db.appConfig.upsert({
     where: { id: APP_CONFIG_ID },
     update: {
       defaultCutoffMinutes,
-      allowlistEnabled: getAllowlistEnabledDefault(),
       predictionsRevealMode: PredictionsRevealMode.AFTER_CUTOFF,
     },
     create: {
       id: APP_CONFIG_ID,
       defaultCutoffMinutes,
-      allowlistEnabled: getAllowlistEnabledDefault(),
+      allowlistEnabled: false,
       predictionsRevealMode: PredictionsRevealMode.AFTER_CUTOFF,
     },
   });
 
   for (const email of adminEmails) {
     await db.allowedEmail.upsert({
-      where: { email },
+      where: {
+        roomId_email: {
+          roomId: room.id,
+          email,
+        },
+      },
       update: { isActive: true },
-      create: { email, isActive: true },
+      create: {
+        roomId: room.id,
+        email,
+        isActive: true,
+      },
     });
   }
 

@@ -6,6 +6,13 @@ import { auth } from "@/auth";
 import type { ActionResult } from "@/lib/action-result";
 import { revalidateAppPaths } from "@/lib/revalidate";
 import {
+  getRoomAdminMatchesPath,
+  getRoomAdminOverviewPath,
+  getRoomAdminResultsPath,
+  getRoomScopedPaths,
+} from "@/lib/rooms";
+import {
+  createRoom,
   recalculateLeaderboard,
   removeAllowedEmail,
   seedFixtures,
@@ -14,6 +21,7 @@ import {
   unsettleFixture,
   updateAppConfig,
   updateFixture,
+  updateRoom,
   upsertAllowedEmail,
 } from "@/server/services/admin-service";
 
@@ -52,6 +60,56 @@ export async function adminSeedFixturesAction(): Promise<ActionResult<{ matchCou
       success: true,
       message: "Fixtures and teams were synced from the official seed data.",
       data: { matchCount: result.matchCount },
+    };
+  } catch (error) {
+    return toActionFailure(error);
+  }
+}
+
+export async function adminCreateRoomAction(input: unknown): Promise<ActionResult<{ roomSlug: string }>> {
+  try {
+    const actorUserId = await getAdminUserId();
+    const room = await createRoom(actorUserId, input);
+    await revalidateAppPaths([
+      "/rooms",
+      "/admin",
+      ...getRoomScopedPaths(room.slug),
+      getRoomAdminOverviewPath(room.slug),
+      getRoomAdminMatchesPath(room.slug),
+      getRoomAdminResultsPath(room.slug),
+    ]);
+
+    return {
+      success: true,
+      message: "Room created.",
+      data: {
+        roomSlug: room.slug,
+      },
+    };
+  } catch (error) {
+    return toActionFailure(error);
+  }
+}
+
+export async function adminUpdateRoomAction(input: unknown): Promise<ActionResult<{ roomSlug: string }>> {
+  try {
+    const actorUserId = await getAdminUserId();
+    const room = await updateRoom(actorUserId, input);
+    await revalidateAppPaths([
+      "/rooms",
+      "/admin",
+      ...getRoomScopedPaths(room.slug),
+      getRoomAdminOverviewPath(room.slug),
+      getRoomAdminMatchesPath(room.slug),
+      getRoomAdminResultsPath(room.slug),
+    ]);
+
+    return {
+      success: true,
+      message: "Room updated.",
+      data: {
+        roomSlug: room.slug,
+      },
     };
   } catch (error) {
     return toActionFailure(error);
@@ -103,11 +161,15 @@ export async function adminUnsettleMatchAction(matchId: string): Promise<ActionR
   }
 }
 
-export async function adminRecalculateAction(): Promise<ActionResult<{ rowCount: number }>> {
+export async function adminRecalculateAction(roomSlug: string): Promise<ActionResult<{ rowCount: number }>> {
   try {
     const actorUserId = await getAdminUserId();
-    const rows = await recalculateLeaderboard(actorUserId);
-    await revalidateAppPaths();
+    const rows = await recalculateLeaderboard(actorUserId, roomSlug);
+    await revalidateAppPaths([
+      "/rooms",
+      ...getRoomScopedPaths(roomSlug),
+      getRoomAdminOverviewPath(roomSlug),
+    ]);
 
     return {
       success: true,
@@ -123,7 +185,7 @@ export async function adminUpdateConfigAction(input: unknown): Promise<ActionRes
   try {
     const actorUserId = await getAdminUserId();
     await updateAppConfig(actorUserId, input);
-    await revalidateAppPaths();
+    await revalidateAppPaths(["/admin", "/rooms"]);
 
     return {
       success: true,
@@ -138,7 +200,7 @@ export async function adminUpsertAllowedEmailAction(input: unknown): Promise<Act
   try {
     const actorUserId = await getAdminUserId();
     await upsertAllowedEmail(actorUserId, input);
-    await revalidateAppPaths();
+    await revalidateAppPaths(["/admin", "/rooms"]);
 
     return {
       success: true,
@@ -153,7 +215,7 @@ export async function adminToggleAllowedEmailAction(input: unknown): Promise<Act
   try {
     const actorUserId = await getAdminUserId();
     await toggleAllowedEmail(actorUserId, input);
-    await revalidateAppPaths();
+    await revalidateAppPaths(["/admin", "/rooms"]);
 
     return {
       success: true,
@@ -168,7 +230,7 @@ export async function adminRemoveAllowedEmailAction(input: unknown): Promise<Act
   try {
     const actorUserId = await getAdminUserId();
     await removeAllowedEmail(actorUserId, input);
-    await revalidateAppPaths();
+    await revalidateAppPaths(["/admin", "/rooms"]);
 
     return {
       success: true,

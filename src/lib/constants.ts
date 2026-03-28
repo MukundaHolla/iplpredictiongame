@@ -6,11 +6,10 @@ export const SINGLE_ROOM_NAME = "Friends Room";
 export const APP_PATHS_TO_REVALIDATE = [
   "/",
   "/join-room",
+  "/rooms",
   "/dashboard",
   "/matches",
   "/leaderboard",
   "/history",
   "/admin",
-  "/admin/matches",
-  "/admin/results",
 ] as const;

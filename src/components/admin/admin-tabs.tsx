@@ -3,22 +3,32 @@
 import { usePathname } from "next/navigation";
 
 import { LoadingLink } from "@/components/navigation/loading-link";
+import {
+  getRoomAdminMatchesPath,
+  getRoomAdminOverviewPath,
+  getRoomAdminResultsPath,
+} from "@/lib/rooms";
 import { cn } from "@/lib/utils";
 
-const tabs = [
-  { href: "/admin", label: "Overview" },
-  { href: "/admin/matches", label: "Fixtures" },
-  { href: "/admin/results", label: "Results" },
-] as const;
+type AdminTabsProps = {
+  roomSlug: string;
+};
 
-export function AdminTabs() {
+export function AdminTabs({ roomSlug }: AdminTabsProps) {
   const pathname = usePathname();
+  const tabs = [
+    { href: getRoomAdminOverviewPath(roomSlug), label: "Overview" },
+    { href: getRoomAdminMatchesPath(roomSlug), label: "Fixtures" },
+    { href: getRoomAdminResultsPath(roomSlug), label: "Results" },
+  ] as const;
 
   return (
     <div className="mt-6 flex flex-wrap gap-2">
       {tabs.map((tab) => {
         const active =
-          tab.href === "/admin" ? pathname === "/admin" : pathname.startsWith(tab.href);
+          tab.href === getRoomAdminOverviewPath(roomSlug)
+            ? pathname === tab.href
+            : pathname.startsWith(tab.href);
 
         return (
           <LoadingLink

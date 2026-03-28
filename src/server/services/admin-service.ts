@@ -2,12 +2,15 @@ import { MatchStage, MatchStatus } from "@prisma/client";
 
 import seedData from "../../../prisma/seed-data/ipl-2026.json";
 import { calculateCutoffTime, parseIstDateTimeInput } from "@/lib/time";
+import { slugifyRoomName } from "@/lib/rooms";
 import {
   adminAllowlistRemoveSchema,
   adminAllowlistToggleSchema,
   adminAllowlistUpsertSchema,
   adminConfigSchema,
   adminMatchUpdateSchema,
+  adminRoomCreateSchema,
+  adminRoomUpdateSchema,
   adminSettlementSchema,
 } from "@/lib/validation";
 import { auditRepository } from "@/server/repositories/audit-repository";
@@ -27,6 +30,16 @@ async function getAppConfigOrThrow() {
   }
 
   return config;
+}
+
+async function getRoomOrThrow(roomSlug: string) {
+  const room = await roomRepository.getRoomBySlug(roomSlug);
+
+  if (!room) {
+    throw new Error("Room not found.");
+  }
+
+  return room;
 }
 
 export async function seedFixtures(actorUserId: string) {
@@ -71,6 +84,61 @@ export async function seedFixtures(actorUserId: string) {
     matchCount: (seedData as SeedData).matches.length,
     teamCount: (seedData as SeedData).teams.length,
   };
+}
+
+export async function createRoom(actorUserId: string, input: unknown) {
+  const parsed = adminRoomCreateSchema.parse(input);
+  const room = await roomRepository.createRoom({
+    name: parsed.name,
+    slug: parsed.slug || slugifyRoomName(parsed.name),
+    code: parsed.code,
+    isActive: parsed.isActive,
+    allowlistEnabled: parsed.allowlistEnabled,
+  });
+
+  await auditRepository.create({
+    actorUserId,
+    action: "ROOM_CREATED",
+    entityType: "Room",
+    entityId: room.id,
+    payload: {
+      slug: room.slug,
+      name: room.name,
+      code: room.code,
+      isActive: room.isActive,
+      allowlistEnabled: room.allowlistEnabled,
+    },
+  });
+
+  return room;
+}
+
+export async function updateRoom(actorUserId: string, input: unknown) {
+  const parsed = adminRoomUpdateSchema.parse(input);
+  const room = await roomRepository.updateRoom({
+    roomId: parsed.roomId,
+    name: parsed.name,
+    slug: parsed.slug || slugifyRoomName(parsed.name),
+    code: parsed.code,
+    isActive: parsed.isActive,
+    allowlistEnabled: parsed.allowlistEnabled,
+  });
+
+  await auditRepository.create({
+    actorUserId,
+    action: "ROOM_UPDATED",
+    entityType: "Room",
+    entityId: room.id,
+    payload: {
+      slug: room.slug,
+      name: room.name,
+      code: room.code,
+      isActive: room.isActive,
+      allowlistEnabled: room.allowlistEnabled,
+    },
+  });
+
+  return room;
 }
 
 export async function updateFixture(actorUserId: string, input: unknown) {
@@ -143,7 +211,7 @@ export async function settleFixtureResult(actorUserId: string, input: unknown) {
     payload: {
       status: parsed.status,
       winningTeamId: parsed.winningTeamId ?? null,
-      settledAt: settledAt?.toISOString() ?? null,
+      settledAt: settledAt.toISOString(),
     },
   });
 
@@ -190,14 +258,19 @@ export async function updateAppConfig(actorUserId: string, input: unknown) {
 
 export async function upsertAllowedEmail(actorUserId: string, input: unknown) {
   const parsed = adminAllowlistUpsertSchema.parse(input);
-  const record = await configRepository.upsertAllowedEmail(parsed.email, parsed.isActive);
+  const room = await getRoomOrThrow(parsed.roomSlug);
+  const record = await configRepository.upsertAllowedEmail(room.id, parsed.email, parsed.isActive);
 
   await auditRepository.create({
     actorUserId,
     action: "ALLOWLIST_EMAIL_UPSERTED",
     entityType: "AllowedEmail",
     entityId: record.id,
-    payload: parsed,
+    payload: {
+      roomSlug: room.slug,
+      email: parsed.email,
+      isActive: parsed.isActive,
+    },
   });
 
   return record;
@@ -205,6 +278,7 @@ export async function upsertAllowedEmail(actorUserId: string, input: unknown) {
 
 export async function toggleAllowedEmail(actorUserId: string, input: unknown) {
   const parsed = adminAllowlistToggleSchema.parse(input);
+  const room = await getRoomOrThrow(parsed.roomSlug);
   const record = await configRepository.updateAllowedEmail(parsed.id, parsed.isActive);
 
   await auditRepository.create({
@@ -212,7 +286,10 @@ export async function toggleAllowedEmail(actorUserId: string, input: unknown) {
     action: "ALLOWLIST_EMAIL_TOGGLED",
     entityType: "AllowedEmail",
     entityId: record.id,
-    payload: parsed,
+    payload: {
+      roomSlug: room.slug,
+      isActive: parsed.isActive,
+    },
   });
 
   return record;
@@ -220,6 +297,7 @@ export async function toggleAllowedEmail(actorUserId: string, input: unknown) {
 
 export async function removeAllowedEmail(actorUserId: string, input: unknown) {
   const parsed = adminAllowlistRemoveSchema.parse(input);
+  const room = await getRoomOrThrow(parsed.roomSlug);
   const record = await configRepository.removeAllowedEmail(parsed.id);
 
   await auditRepository.create({
@@ -227,21 +305,26 @@ export async function removeAllowedEmail(actorUserId: string, input: unknown) {
     action: "ALLOWLIST_EMAIL_REMOVED",
     entityType: "AllowedEmail",
     entityId: record.id,
-    payload: { email: record.email },
+    payload: {
+      roomSlug: room.slug,
+      email: record.email,
+    },
   });
 
   return record;
 }
 
-export async function recalculateLeaderboard(actorUserId: string) {
-  const leaderboard = await getLeaderboardRows();
+export async function recalculateLeaderboard(actorUserId: string, roomSlug: string) {
+  const room = await getRoomOrThrow(roomSlug);
+  const leaderboard = await getLeaderboardRows(room.id);
 
   await auditRepository.create({
     actorUserId,
     action: "LEADERBOARD_RECALCULATED",
     entityType: "Leaderboard",
-    entityId: "room-singleton",
+    entityId: room.id,
     payload: {
+      roomSlug: room.slug,
       rowCount: leaderboard.length,
     },
   });
@@ -252,18 +335,39 @@ export async function recalculateLeaderboard(actorUserId: string) {
 export async function getAdminOverviewData() {
   await ensureSystemReady();
 
-  const room = await roomRepository.getActiveRoom();
+  const [config, audits, rooms] = await Promise.all([
+    getAppConfigOrThrow(),
+    auditRepository.listRecent(),
+    roomRepository.listRooms(),
+  ]);
 
-  if (!room) {
-    throw new Error("The private room has not been initialized yet.");
-  }
+  return {
+    config,
+    audits,
+    rooms: rooms.map((room) => ({
+      id: room.id,
+      slug: room.slug,
+      name: room.name,
+      code: room.code,
+      isActive: room.isActive,
+      allowlistEnabled: room.allowlistEnabled,
+      memberCount: room._count.memberships,
+      inviteCount: room._count.allowedEmails,
+    })),
+  };
+}
+
+export async function getAdminRoomOverviewData(roomSlug: string) {
+  await ensureSystemReady();
+
+  const room = await getRoomOrThrow(roomSlug);
 
   const [config, allowlist, audits, memberships, leaderboard] = await Promise.all([
     getAppConfigOrThrow(),
-    configRepository.listAllowedEmails(),
+    configRepository.listAllowedEmails(room.id),
     auditRepository.listRecent(),
     roomRepository.listMemberships(room.id),
-    getLeaderboardRows(),
+    getLeaderboardRows(room.id),
   ]);
 
   return {
@@ -276,7 +380,8 @@ export async function getAdminOverviewData() {
   };
 }
 
-export async function getAdminMatchesData() {
+export async function getAdminMatchesData(roomSlug: string) {
   await ensureSystemReady();
+  await getRoomOrThrow(roomSlug);
   return matchRepository.listMatches();
 }

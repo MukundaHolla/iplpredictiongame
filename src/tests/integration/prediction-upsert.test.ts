@@ -53,6 +53,7 @@ describeIfDb("prediction upsert uniqueness", () => {
       data: {
         roomId: room.id,
         userId: user.id,
+        joinedAt: new Date("2026-03-28T10:00:00.000Z"),
       },
     });
 

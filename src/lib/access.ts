@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { getRoomStateForUser } from "@/server/services/membership-service";
+import { getPreferredRoomRedirectPath, getRoomContextForUser } from "@/server/services/membership-service";
 
 export async function getSessionUserOrNull() {
   const session = await auth();
@@ -18,12 +18,23 @@ export async function requireAuthenticatedUser() {
   return user;
 }
 
-export async function requireMemberUser() {
+export async function requireGlobalAdminUser() {
   const user = await requireAuthenticatedUser();
-  const roomState = await getRoomStateForUser(user.id);
+
+  if (user.role !== "ADMIN") {
+    const destination = await getPreferredRoomRedirectPath(user.id);
+    redirect(destination);
+  }
+
+  return user;
+}
+
+export async function requireRoomMemberUser(roomSlug: string) {
+  const user = await requireAuthenticatedUser();
+  const roomState = await getRoomContextForUser(user.id, roomSlug);
 
   if (!roomState.membership) {
-    redirect("/join-room");
+    redirect("/rooms");
   }
 
   const { user: dbUser, ...rest } = roomState;
@@ -35,12 +46,15 @@ export async function requireMemberUser() {
   };
 }
 
-export async function requireAdminUser() {
-  const context = await requireMemberUser();
+export async function requireRoomAdminUser(roomSlug: string) {
+  const user = await requireGlobalAdminUser();
+  const roomState = await getRoomContextForUser(user.id, roomSlug);
 
-  if (context.user.role !== "ADMIN") {
-    redirect("/dashboard");
-  }
+  const { user: dbUser, ...rest } = roomState;
 
-  return context;
+  return {
+    user,
+    dbUser,
+    ...rest,
+  };
 }

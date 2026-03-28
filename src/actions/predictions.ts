@@ -10,10 +10,11 @@ import {
   isPredictionMatchDay,
 } from "@/lib/game";
 import { revalidateAppPaths } from "@/lib/revalidate";
+import { getRoomScopedPaths } from "@/lib/rooms";
 import { predictionInputSchema } from "@/lib/validation";
 import { matchRepository } from "@/server/repositories/match-repository";
 import { predictionRepository } from "@/server/repositories/prediction-repository";
-import { getRoomStateForUser } from "@/server/services/membership-service";
+import { getRoomContextForUser } from "@/server/services/membership-service";
 
 export async function upsertPredictionAction(input: unknown): Promise<ActionResult> {
   const session = await auth();
@@ -27,12 +28,12 @@ export async function upsertPredictionAction(input: unknown): Promise<ActionResu
 
   try {
     const parsed = predictionInputSchema.parse(input);
-    const { room, membership } = await getRoomStateForUser(session.user.id);
+    const { room, membership } = await getRoomContextForUser(session.user.id, parsed.roomSlug);
 
     if (!membership) {
       return {
         success: false,
-        message: "Join the private room before making predictions.",
+        message: "Join this room before making predictions.",
       };
     }
 
@@ -84,7 +85,7 @@ export async function upsertPredictionAction(input: unknown): Promise<ActionResu
       isLockedSnapshot: false,
     });
 
-    await revalidateAppPaths();
+    await revalidateAppPaths(getRoomScopedPaths(room.slug));
 
     return {
       success: true,

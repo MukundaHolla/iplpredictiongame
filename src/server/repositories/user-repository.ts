@@ -9,6 +9,15 @@ export const userRepository = {
     });
   },
 
+  updateLastRoom(userId: string, roomId: string | null) {
+    return db.user.update({
+      where: { id: userId },
+      data: {
+        lastRoomId: roomId,
+      },
+    });
+  },
+
   syncAdminRoles(adminEmails: string[]) {
     if (adminEmails.length === 0) {
       return Promise.resolve({ count: 0 });

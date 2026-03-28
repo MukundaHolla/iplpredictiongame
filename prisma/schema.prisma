@@ -44,6 +44,7 @@ model User {
   name          String?
   image         String?
   role          UserRole         @default(USER)
+  lastRoomId    String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
   accounts      Account[]
@@ -51,17 +52,24 @@ model User {
   memberships   RoomMembership[]
   predictions   Prediction[]
   auditLogs     AuditLog[]       @relation("AuditActor")
+  lastRoom      Room?            @relation("LastRoom", fields: [lastRoomId], references: [id], onDelete: SetNull)
+
+  @@index([lastRoomId])
 }
 
 model Room {
   id          String           @id @default(cuid())
   code        String           @unique
+  slug        String           @unique
   name        String
   isActive    Boolean          @default(true)
+  allowlistEnabled Boolean     @default(false)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   memberships RoomMembership[]
   predictions Prediction[]
+  allowedEmails AllowedEmail[]
+  lastUsedByUsers User[]       @relation("LastRoom")
 }
 
 model RoomMembership {
@@ -150,9 +158,14 @@ model AppConfig {
 
 model AllowedEmail {
   id        String   @id @default(cuid())
-  email     String   @unique
+  roomId    String
+  email     String
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, email])
+  @@index([roomId])
 }
 
 model AuditLog {

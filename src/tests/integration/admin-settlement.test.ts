@@ -61,8 +61,16 @@ describeIfDb("admin settlement updates leaderboard", () => {
 
     await db.roomMembership.createMany({
       data: [
-        { roomId: room.id, userId: admin.id },
-        { roomId: room.id, userId: player.id },
+        {
+          roomId: room.id,
+          userId: admin.id,
+          joinedAt: new Date("2026-03-28T10:00:00.000Z"),
+        },
+        {
+          roomId: room.id,
+          userId: player.id,
+          joinedAt: new Date("2026-03-28T10:00:00.000Z"),
+        },
       ],
     });
 
@@ -76,7 +84,7 @@ describeIfDb("admin settlement updates leaderboard", () => {
       },
     });
 
-    const before = await getLeaderboardRows();
+    const before = await getLeaderboardRows(room.id);
     expect(before.find((row) => row.userId === player.id)?.points).toBe(0);
 
     await settleFixtureResult(admin.id, {
@@ -85,7 +93,7 @@ describeIfDb("admin settlement updates leaderboard", () => {
       winningTeamId: teamA.id,
     });
 
-    const after = await getLeaderboardRows();
+    const after = await getLeaderboardRows(room.id);
     const playerRow = after.find((row) => row.userId === player.id);
 
     expect(playerRow).toMatchObject({

@@ -11,12 +11,13 @@ import { useAppLoading } from "@/components/providers/app-loading-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { isNextRedirectError } from "@/lib/is-next-redirect-error";
 
 type JoinRoomFormProps = {
-  allowlistEnabled: boolean;
+  helperText?: string;
 };
 
-export function JoinRoomForm({ allowlistEnabled }: JoinRoomFormProps) {
+export function JoinRoomForm({ helperText }: JoinRoomFormProps) {
   const router = useRouter();
   const { beginLoading, endLoading } = useAppLoading();
   const [code, setCode] = useState("");
@@ -40,7 +41,7 @@ export function JoinRoomForm({ allowlistEnabled }: JoinRoomFormProps) {
           }
 
           toast.success(result.message ?? "Joined the room.");
-          router.push("/dashboard");
+          router.push(result.data?.redirectPath ?? "/rooms");
           router.refresh();
         });
       }}
@@ -61,9 +62,8 @@ export function JoinRoomForm({ allowlistEnabled }: JoinRoomFormProps) {
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-0.5 size-4 shrink-0 text-blue-600" />
           <p>
-            {allowlistEnabled
-              ? "Get the room code from the admin. Your Google email must also be on the allowlist."
-              : "Get the room code from the admin before joining the league."}
+            {helperText ??
+              "Get the room code from the admin. Some rooms also require your Google email to be invited."}
           </p>
         </div>
       </div>
@@ -87,10 +87,21 @@ export function JoinRoomForm({ allowlistEnabled }: JoinRoomFormProps) {
             beginLoading("Switching accounts");
 
             startSignOutTransition(async () => {
+              let redirected = false;
+
               try {
                 await signOutAction();
+              } catch (error) {
+                if (isNextRedirectError(error)) {
+                  redirected = true;
+                  return;
+                }
+
+                toast.error(error instanceof Error ? error.message : "We couldn't sign you out.");
               } finally {
-                endLoading();
+                if (!redirected) {
+                  endLoading();
+                }
               }
             });
           }}

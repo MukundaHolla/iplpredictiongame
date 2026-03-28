@@ -16,14 +16,19 @@ import type {
   MatchCardView,
   MatchDistributionView,
   MatchIndividualPickView,
+  RoomSummaryView,
+  RoomsHomeView,
 } from "@/lib/types";
 import { matchRepository } from "@/server/repositories/match-repository";
 import { predictionRepository } from "@/server/repositories/prediction-repository";
+import { roomRepository } from "@/server/repositories/room-repository";
 import { getLeaderboardPositionForUser, getLeaderboardRows } from "@/server/services/leaderboard-service";
-import { getRoomStateForUser } from "@/server/services/membership-service";
+import { getRoomContextForUser, getRoomStateForUser } from "@/server/services/membership-service";
 
 type MatchRecord = Awaited<ReturnType<typeof matchRepository.listMatches>>[number];
 type PredictionRecord = Awaited<ReturnType<typeof predictionRepository.listRoomPredictions>>[number];
+type MembershipRecord = Awaited<ReturnType<typeof roomRepository.getUserMemberships>>[number];
+type RoomRecord = Awaited<ReturnType<typeof roomRepository.listRoomsByIds>>[number];
 
 function buildDistribution(match: MatchRecord, predictionsForMatch: PredictionRecord[]): MatchDistributionView {
   const totalPredictions = predictionsForMatch.length;
@@ -53,9 +58,7 @@ function buildDistribution(match: MatchRecord, predictionsForMatch: PredictionRe
   };
 }
 
-function buildIndividualPicks(
-  predictionsForMatch: PredictionRecord[],
-): MatchIndividualPickView[] {
+function buildIndividualPicks(predictionsForMatch: PredictionRecord[]): MatchIndividualPickView[] {
   return predictionsForMatch
     .map((prediction) => ({
       userId: prediction.userId,
@@ -65,6 +68,29 @@ function buildIndividualPicks(
       pickedTeamShortCode: prediction.predictedTeam.shortCode,
     }))
     .sort((left, right) => left.name.localeCompare(right.name));
+}
+
+function toRoomSummaryView(
+  room: RoomRecord,
+  joinedAt: Date | null,
+): RoomSummaryView {
+  return {
+    id: room.id,
+    slug: room.slug,
+    name: room.name,
+    isActive: room.isActive,
+    joinedAt: joinedAt?.toISOString() ?? null,
+    memberCount: room._count.memberships,
+    allowlistEnabled: room.allowlistEnabled,
+  };
+}
+
+async function getJoinedRoomSummaries(memberships: MembershipRecord[]) {
+  const roomIds = memberships.map((membership) => membership.roomId);
+  const rooms = await roomRepository.listRoomsByIds(roomIds);
+  const joinedAtByRoomId = new Map(memberships.map((membership) => [membership.roomId, membership.joinedAt]));
+
+  return rooms.map((room) => toRoomSummaryView(room, joinedAtByRoomId.get(room.id) ?? null));
 }
 
 function toMatchCardView(
@@ -129,24 +155,26 @@ function toMatchCardView(
     revealAggregate,
     revealIndividualPicks,
     distribution: revealAggregate ? buildDistribution(match, predictionsForMatch) : null,
-    individualPicks: revealIndividualPicks
-      ? buildIndividualPicks(predictionsForMatch)
-      : [],
+    individualPicks: revealIndividualPicks ? buildIndividualPicks(predictionsForMatch) : [],
   };
 }
 
-export async function getDashboardView(userId: string): Promise<DashboardView> {
-  const { room, membership, config, user } = await getRoomStateForUser(userId);
+export async function getDashboardView(userId: string, roomSlug: string): Promise<DashboardView> {
+  const { room, membership, memberships, config, user } = await getRoomContextForUser(
+    userId,
+    roomSlug,
+  );
 
   if (!membership) {
-    throw new Error("You must join the private room before viewing the dashboard.");
+    throw new Error("You must join this room before viewing its dashboard.");
   }
 
   const now = new Date();
-  const [matches, roomPredictions, userRank] = await Promise.all([
+  const [matches, roomPredictions, userRank, joinedRooms] = await Promise.all([
     matchRepository.listMatches(),
     predictionRepository.listRoomPredictions(room.id),
-    getLeaderboardPositionForUser(userId),
+    getLeaderboardPositionForUser(user.id, room.id),
+    getJoinedRoomSummaries(memberships),
   ]);
 
   const userPredictionsByMatch = new Map<string, PredictionRecord>(
@@ -181,9 +209,16 @@ export async function getDashboardView(userId: string): Promise<DashboardView> {
     MatchStatus.NO_RESULT,
   ]);
 
+  const currentRoomSummary = joinedRooms.find((joinedRoom) => joinedRoom.id === room.id);
+
+  if (!currentRoomSummary) {
+    throw new Error("Room membership is missing from the available rooms list.");
+  }
+
   return {
     greetingName: user.name ?? user.email ?? "Player",
-    roomName: room.name,
+    room: currentRoomSummary,
+    joinedRooms,
     myRank: userRank,
     revealMode: config.predictionsRevealMode,
     today: matchCards.filter(
@@ -206,11 +241,11 @@ export async function getDashboardView(userId: string): Promise<DashboardView> {
   };
 }
 
-export async function getAllMatchesView(userId: string) {
-  const { room, membership, config } = await getRoomStateForUser(userId);
+export async function getAllMatchesView(userId: string, roomSlug: string) {
+  const { room, membership, config } = await getRoomContextForUser(userId, roomSlug);
 
   if (!membership) {
-    throw new Error("You must join the private room before viewing matches.");
+    throw new Error("You must join this room before viewing matches.");
   }
 
   const now = new Date();
@@ -245,11 +280,11 @@ export async function getAllMatchesView(userId: string) {
   );
 }
 
-export async function getHistoryView(userId: string): Promise<HistoryRowView[]> {
-  const { room, membership } = await getRoomStateForUser(userId);
+export async function getHistoryView(userId: string, roomSlug: string): Promise<HistoryRowView[]> {
+  const { room, membership } = await getRoomContextForUser(userId, roomSlug);
 
   if (!membership) {
-    throw new Error("You must join the private room before viewing history.");
+    throw new Error("You must join this room before viewing history.");
   }
 
   const [matches, predictions] = await Promise.all([
@@ -257,9 +292,10 @@ export async function getHistoryView(userId: string): Promise<HistoryRowView[]> 
     predictionRepository.listUserPredictions(room.id, userId),
   ]);
 
-  const predictionsByMatch = new Map<string, Awaited<ReturnType<typeof predictionRepository.listUserPredictions>>[number]>(
-    predictions.map((prediction) => [prediction.matchId, prediction]),
-  );
+  const predictionsByMatch = new Map<
+    string,
+    Awaited<ReturnType<typeof predictionRepository.listUserPredictions>>[number]
+  >(predictions.map((prediction) => [prediction.matchId, prediction]));
 
   return matches
     .map((match) => {
@@ -320,6 +356,22 @@ export async function getHistoryView(userId: string): Promise<HistoryRowView[]> 
     );
 }
 
-export async function getLeaderboardView() {
-  return getLeaderboardRows();
+export async function getLeaderboardView(userId: string, roomSlug: string) {
+  const { room, membership } = await getRoomContextForUser(userId, roomSlug);
+
+  if (!membership) {
+    throw new Error("You must join this room before viewing the leaderboard.");
+  }
+
+  return getLeaderboardRows(room.id);
+}
+
+export async function getRoomsHomeView(userId: string): Promise<RoomsHomeView> {
+  const { memberships, membership } = await getRoomStateForUser(userId);
+  const rooms = await getJoinedRoomSummaries(memberships);
+
+  return {
+    currentRoomSlug: membership?.room.slug ?? null,
+    rooms,
+  };
 }

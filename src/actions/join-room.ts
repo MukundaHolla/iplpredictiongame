@@ -5,10 +5,13 @@ import { ZodError } from "zod";
 import { auth } from "@/auth";
 import type { ActionResult } from "@/lib/action-result";
 import { revalidateAppPaths } from "@/lib/revalidate";
+import { getRoomDashboardPath, getRoomScopedPaths } from "@/lib/rooms";
 import { joinRoomSchema } from "@/lib/validation";
-import { joinPrivateRoom } from "@/server/services/membership-service";
+import { joinRoomByCode } from "@/server/services/membership-service";
 
-export async function joinRoomAction(input: unknown): Promise<ActionResult> {
+export async function joinRoomAction(
+  input: unknown,
+): Promise<ActionResult<{ roomSlug: string; redirectPath: string }>> {
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -20,12 +23,17 @@ export async function joinRoomAction(input: unknown): Promise<ActionResult> {
 
   try {
     const parsed = joinRoomSchema.parse(input);
-    await joinPrivateRoom(session.user.id, parsed.code);
-    await revalidateAppPaths();
+    const membership = await joinRoomByCode(session.user.id, parsed.code);
+    const redirectPath = getRoomDashboardPath(membership.room.slug);
+    await revalidateAppPaths(["/rooms", redirectPath, ...getRoomScopedPaths(membership.room.slug)]);
 
     return {
       success: true,
       message: "You’re in. Welcome to the room.",
+      data: {
+        roomSlug: membership.room.slug,
+        redirectPath,
+      },
     };
   } catch (error) {
     if (error instanceof ZodError) {
@@ -39,7 +47,7 @@ export async function joinRoomAction(input: unknown): Promise<ActionResult> {
     return {
       success: false,
       message:
-        error instanceof Error ? error.message : "Unable to join the private room right now.",
+        error instanceof Error ? error.message : "Unable to join a room right now.",
     };
   }
 }

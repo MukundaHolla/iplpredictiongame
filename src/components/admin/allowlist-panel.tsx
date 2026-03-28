@@ -22,10 +22,11 @@ type AllowlistEntry = {
 };
 
 type AllowlistPanelProps = {
+  roomSlug: string;
   entries: AllowlistEntry[];
 };
 
-export function AllowlistPanel({ entries }: AllowlistPanelProps) {
+export function AllowlistPanel({ roomSlug, entries }: AllowlistPanelProps) {
   const router = useRouter();
   const { beginLoading, endLoading } = useAppLoading();
   const [email, setEmail] = useState("");
@@ -50,6 +51,7 @@ export function AllowlistPanel({ entries }: AllowlistPanelProps) {
 
           startTransition(async () => {
             const result = await adminUpsertAllowedEmailAction({
+              roomSlug,
               email,
               isActive: true,
             });
@@ -110,6 +112,7 @@ export function AllowlistPanel({ entries }: AllowlistPanelProps) {
 
                   startTransition(async () => {
                     const result = await adminToggleAllowedEmailAction({
+                      roomSlug,
                       id: entry.id,
                       isActive: checked,
                     });
@@ -136,7 +139,10 @@ export function AllowlistPanel({ entries }: AllowlistPanelProps) {
                   beginLoading("Updating room access");
 
                   startTransition(async () => {
-                    const result = await adminRemoveAllowedEmailAction({ id: entry.id });
+                    const result = await adminRemoveAllowedEmailAction({
+                      roomSlug,
+                      id: entry.id,
+                    });
 
                     setPendingKey(null);
 

@@ -1,38 +1,12 @@
-import { AdminResultsTable } from "@/components/admin/admin-results-table";
-import { SectionHeader } from "@/components/section-header";
-import { requireAdminUser } from "@/lib/access";
-import { getAdminMatchesData } from "@/server/services/admin-service";
+import { redirect } from "next/navigation";
+
+import { requireGlobalAdminUser } from "@/lib/access";
+import { getRoomAdminResultsPath } from "@/lib/rooms";
+import { getRoomStateForUser } from "@/server/services/membership-service";
 
 export default async function AdminResultsPage() {
-  await requireAdminUser();
-  const matches = await getAdminMatchesData();
+  const user = await requireGlobalAdminUser();
+  const roomState = await getRoomStateForUser(user.id);
 
-  return (
-    <div className="space-y-6">
-      <SectionHeader
-        eyebrow="Results"
-        title="Settle winners"
-        description="Choose the winner for completed matches or mark a fixture as abandoned / no result. Leaderboard updates immediately."
-      />
-      <AdminResultsTable
-        matches={matches.map((match) => ({
-          id: match.id,
-          matchNumber: match.matchNumber,
-          status: match.status,
-          winningTeamId: match.winningTeamId,
-          startTimeUtc: match.startTimeUtc.toISOString(),
-          teamA: {
-            id: match.teamA.id,
-            shortCode: match.teamA.shortCode,
-            name: match.teamA.name,
-          },
-          teamB: {
-            id: match.teamB.id,
-            shortCode: match.teamB.shortCode,
-            name: match.teamB.name,
-          },
-        }))}
-      />
-    </div>
-  );
+  redirect(roomState.room ? getRoomAdminResultsPath(roomState.room.slug) : "/admin");
 }

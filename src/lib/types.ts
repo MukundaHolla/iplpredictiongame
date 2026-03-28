@@ -8,6 +8,16 @@ export type AppUser = {
   role: "USER" | "ADMIN";
 };
 
+export type RoomSummaryView = {
+  id: string;
+  slug: string;
+  name: string;
+  isActive: boolean;
+  joinedAt: string | null;
+  memberCount: number;
+  allowlistEnabled: boolean;
+};
+
 export type MatchTeamView = {
   id: string;
   name: string;
@@ -63,12 +73,18 @@ export type MatchCardView = {
 
 export type DashboardView = {
   greetingName: string;
-  roomName: string;
+  room: RoomSummaryView;
+  joinedRooms: RoomSummaryView[];
   myRank: number | null;
   revealMode: PredictionsRevealMode;
   today: MatchCardView[];
   upcoming: MatchCardView[];
   settled: MatchCardView[];
+};
+
+export type RoomsHomeView = {
+  currentRoomSlug: string | null;
+  rooms: RoomSummaryView[];
 };
 
 export type LeaderboardRowView = {
@@ -99,4 +115,15 @@ export type HistoryRowView = {
   status: MatchStatus;
   resultLabel: "Pre-Join" | "Pending" | "Correct" | "Wrong" | "Skipped" | "No Result";
   pointsEarned: number;
+};
+
+export type AdminRoomListItemView = {
+  id: string;
+  slug: string;
+  name: string;
+  code: string;
+  isActive: boolean;
+  allowlistEnabled: boolean;
+  memberCount: number;
+  inviteCount: number;
 };

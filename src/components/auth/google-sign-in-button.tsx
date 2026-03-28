@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { signInWithGoogle } from "@/actions/auth-actions";
 import { useAppLoading } from "@/components/providers/app-loading-provider";
 import { Button } from "@/components/ui/button";
+import { isNextRedirectError } from "@/lib/is-next-redirect-error";
 import { cn } from "@/lib/utils";
 
 type GoogleSignInButtonProps = {
@@ -32,6 +33,10 @@ export function GoogleSignInButton({
           try {
             await signInWithGoogle();
           } catch (error) {
+            if (isNextRedirectError(error)) {
+              return;
+            }
+
             endLoading();
             toast.error(
               error instanceof Error ? error.message : "We couldn't start Google sign-in.",

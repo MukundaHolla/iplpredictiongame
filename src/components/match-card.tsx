@@ -20,6 +20,7 @@ import type { MatchCardView } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type MatchCardProps = {
+  roomSlug: string;
   match: MatchCardView;
   index?: number;
 };
@@ -56,7 +57,7 @@ function getStatusClass(status: MatchCardView["status"]) {
   }
 }
 
-export function MatchCard({ match, index = 0 }: MatchCardProps) {
+export function MatchCard({ roomSlug, match, index = 0 }: MatchCardProps) {
   const { date, time } = formatMatchDateTime(new Date(match.startTimeUtc));
   const pickedTeamShortCode =
     match.myPredictionTeamId === match.teamA.id
@@ -187,6 +188,7 @@ export function MatchCard({ match, index = 0 }: MatchCardProps) {
               ) : null}
             </div>
             <PredictionSelector
+              roomSlug={roomSlug}
               matchId={match.id}
               teamA={match.teamA}
               teamB={match.teamB}

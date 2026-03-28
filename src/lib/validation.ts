@@ -6,6 +6,7 @@ export const joinRoomSchema = z.object({
 });
 
 export const predictionInputSchema = z.object({
+  roomSlug: z.string().trim().min(1),
   matchId: z.string().trim().min(1),
   predictedTeamId: z.string().trim().min(1),
 });
@@ -52,20 +53,38 @@ export const adminSettlementSchema = z
 
 export const adminConfigSchema = z.object({
   defaultCutoffMinutes: z.coerce.number().int().min(0).max(1440),
-  allowlistEnabled: z.boolean(),
   predictionsRevealMode: z.nativeEnum(PredictionsRevealMode),
 });
 
+export const adminRoomCreateSchema = z.object({
+  name: z.string().trim().min(3).max(80),
+  slug: z.string().trim().min(3).max(80).regex(/^[a-z0-9-]+$/),
+  code: z.string().trim().min(4).max(64),
+  isActive: z.boolean(),
+  allowlistEnabled: z.boolean(),
+});
+
+export const adminRoomUpdateSchema = adminRoomCreateSchema.extend({
+  roomId: z.string().trim().min(1),
+});
+
+export const roomSwitchSchema = z.object({
+  roomSlug: z.string().trim().min(1),
+});
+
 export const adminAllowlistUpsertSchema = z.object({
+  roomSlug: z.string().trim().min(1),
   email: z.email().transform((value) => value.toLowerCase().trim()),
   isActive: z.boolean().default(true),
 });
 
 export const adminAllowlistToggleSchema = z.object({
+  roomSlug: z.string().trim().min(1),
   id: z.string().trim().min(1),
   isActive: z.boolean(),
 });
 
 export const adminAllowlistRemoveSchema = z.object({
+  roomSlug: z.string().trim().min(1),
   id: z.string().trim().min(1),
 });

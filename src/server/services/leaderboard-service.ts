@@ -11,13 +11,13 @@ import { predictionRepository } from "@/server/repositories/prediction-repositor
 import { roomRepository } from "@/server/repositories/room-repository";
 import { ensureSystemReady } from "@/server/services/system-service";
 
-async function loadLeaderboardInputs() {
+async function loadLeaderboardInputs(roomId: string) {
   await ensureSystemReady();
 
-  const room = await roomRepository.getActiveRoom();
+  const room = await roomRepository.getRoomById(roomId);
 
   if (!room) {
-    throw new Error("The private room has not been created yet.");
+    throw new Error("The selected room does not exist.");
   }
 
   const [memberships, predictions, matches] = await Promise.all([
@@ -50,14 +50,14 @@ function toLeaderboardRows(entries: LeaderboardEntry[]): LeaderboardRowView[] {
   }));
 }
 
-export async function getLeaderboardRows() {
-  const { memberships, predictions, matches } = await loadLeaderboardInputs();
+export async function getLeaderboardRows(roomId: string) {
+  const { memberships, predictions, matches } = await loadLeaderboardInputs(roomId);
   const entries = computeLeaderboard(memberships, matches, predictions);
 
   return toLeaderboardRows(entries);
 }
 
-export async function getLeaderboardPositionForUser(userId: string) {
-  const rows = await getLeaderboardRows();
+export async function getLeaderboardPositionForUser(userId: string, roomId: string) {
+  const rows = await getLeaderboardRows(roomId);
   return rows.find((row) => row.userId === userId)?.rank ?? null;
 }

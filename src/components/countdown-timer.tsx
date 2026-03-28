@@ -38,17 +38,26 @@ export function CountdownTimer({
   className,
 }: CountdownTimerProps) {
   const [now, setNow] = useState(() => Date.now());
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setMounted(true);
+      setNow(Date.now());
+    });
+
     if (locked) {
-      return;
+      return () => window.cancelAnimationFrame(frame);
     }
 
     const interval = window.setInterval(() => {
       setNow(Date.now());
     }, 1000 * 15);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearInterval(interval);
+    };
   }, [locked, targetIso]);
 
   return (
@@ -60,8 +69,9 @@ export function CountdownTimer({
           : "border-blue-100 bg-blue-50 text-blue-700",
         className,
       )}
+      suppressHydrationWarning
     >
-      {locked ? "Locked" : formatRemaining(targetIso, now)}
+      {locked ? "Locked" : mounted ? formatRemaining(targetIso, now) : "Calculating"}
     </span>
   );
 }

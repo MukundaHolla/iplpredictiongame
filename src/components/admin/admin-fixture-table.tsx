@@ -68,7 +68,73 @@ export function AdminFixtureTable({ matches }: AdminFixtureTableProps) {
 
   return (
     <>
-      <div className="surface-card overflow-hidden p-0">
+      <div className="grid gap-4 lg:hidden">
+        {sortedMatches.map((match) => {
+          const start = formatMatchDateTime(new Date(match.startTimeUtc));
+          const cutoffMinutes = Math.abs(
+            differenceInMinutes(new Date(match.startTimeUtc), new Date(match.cutoffTimeUtc)),
+          );
+
+          return (
+            <div key={match.id} className="surface-card p-4">
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-heading text-xl text-slate-900">
+                      {match.matchNumber ? `Match #${match.matchNumber}` : match.stage}
+                    </p>
+                    <p className="text-sm text-slate-500">{match.stage.replaceAll("_", " ")}</p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedMatch(match);
+                      setForm({
+                        stage: match.stage,
+                        venue: match.venue ?? "",
+                        city: match.city ?? "",
+                        startTimeLocal: formatDateTimeLocalValue(new Date(match.startTimeUtc)),
+                        cutoffMinutes: String(cutoffMinutes),
+                      });
+                    }}
+                    className="rounded-xl border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    <PencilLine className="size-4" />
+                    Edit
+                  </Button>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                  <p className="font-medium text-slate-900">
+                    {match.teamA.shortCode} vs {match.teamB.shortCode}
+                  </p>
+                  <p className="mt-1 text-sm text-slate-500">
+                    {match.teamA.name} vs {match.teamB.name}
+                  </p>
+                </div>
+                <div className="grid gap-3 text-sm text-slate-600 sm:grid-cols-3">
+                  <div>
+                    <p className="font-medium text-slate-900">Start</p>
+                    <p>{start.date}</p>
+                    <p>{start.time}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900">Venue</p>
+                    <p>{match.city ? `${match.city} · ${match.venue ?? "Venue TBA"}` : match.venue ?? "Venue TBA"}</p>
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900">Cutoff</p>
+                    <p>{cutoffMinutes} min before start</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="surface-card hidden overflow-hidden p-0 lg:block">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="border-slate-200 bg-slate-50 hover:bg-slate-50">
@@ -136,6 +202,7 @@ export function AdminFixtureTable({ matches }: AdminFixtureTableProps) {
             })}
           </TableBody>
         </Table>
+        </div>
       </div>
 
       <Dialog open={Boolean(selectedMatch)} onOpenChange={(open) => !open && setSelectedMatch(null)}>

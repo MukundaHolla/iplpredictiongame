@@ -2,21 +2,20 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { getDashboardView } from "@/server/services/query-service";
-import { getRoomStateForUser } from "@/server/services/membership-service";
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await auth();
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const roomState = await getRoomStateForUser(session.user.id);
+  const roomSlug = new URL(request.url).searchParams.get("roomSlug");
 
-  if (!roomState.membership) {
-    return NextResponse.json({ error: "Join the private room first." }, { status: 403 });
+  if (!roomSlug) {
+    return NextResponse.json({ error: "roomSlug is required." }, { status: 400 });
   }
 
-  const data = await getDashboardView(session.user.id);
+  const data = await getDashboardView(session.user.id, roomSlug);
   return NextResponse.json(data);
 }

@@ -1,32 +1,12 @@
-import { AdminFixtureTable } from "@/components/admin/admin-fixture-table";
-import { SectionHeader } from "@/components/section-header";
-import { requireAdminUser } from "@/lib/access";
-import { getAdminMatchesData } from "@/server/services/admin-service";
+import { redirect } from "next/navigation";
+
+import { requireGlobalAdminUser } from "@/lib/access";
+import { getRoomStateForUser } from "@/server/services/membership-service";
+import { getRoomAdminMatchesPath } from "@/lib/rooms";
 
 export default async function AdminMatchesPage() {
-  await requireAdminUser();
-  const matches = await getAdminMatchesData();
+  const user = await requireGlobalAdminUser();
+  const roomState = await getRoomStateForUser(user.id);
 
-  return (
-    <div className="space-y-6">
-      <SectionHeader
-        eyebrow="Fixtures"
-        title="Edit seeded fixtures"
-        description="Change match time, cutoff, venue, city, or stage without touching the database manually."
-      />
-      <AdminFixtureTable
-        matches={matches.map((match) => ({
-          id: match.id,
-          matchNumber: match.matchNumber,
-          stage: match.stage,
-          startTimeUtc: match.startTimeUtc.toISOString(),
-          cutoffTimeUtc: match.cutoffTimeUtc.toISOString(),
-          venue: match.venue,
-          city: match.city,
-          teamA: { shortCode: match.teamA.shortCode, name: match.teamA.name },
-          teamB: { shortCode: match.teamB.shortCode, name: match.teamB.name },
-        }))}
-      />
-    </div>
-  );
+  redirect(roomState.room ? getRoomAdminMatchesPath(roomState.room.slug) : "/admin");
 }
