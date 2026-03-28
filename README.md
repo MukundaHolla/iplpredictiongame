@@ -146,21 +146,60 @@ The build uses `next build --webpack` for reliability in constrained environment
 
 ## Deployment on Vercel + Neon
 
-1. Create a Neon Postgres database.
-2. Add `DATABASE_URL` and `DIRECT_URL` to Vercel project env vars.
-3. Add the remaining auth and app env vars from [`.env.example`](/Users/mukundaholla/homebase/iplpredictiongame/.env.example).
-4. Deploy to Vercel.
-5. Run Prisma migrations against production.
+### First Production Launch
+
+1. Import the GitHub repo into Vercel and choose a stable project slug.
+2. Use the resulting `https://<project-slug>.vercel.app` URL as the initial production URL.
+3. In Google Cloud, add:
+   - Authorized JavaScript origin: `https://<project-slug>.vercel.app`
+   - Authorized redirect URI: `https://<project-slug>.vercel.app/api/auth/callback/google`
+4. In Vercel, set **Production** env vars only:
+   - `DATABASE_URL`: Neon pooled/runtime URL
+   - `DIRECT_URL`: Neon direct URL
+   - `AUTH_SECRET`: fresh production secret
+   - `AUTH_GOOGLE_ID`
+   - `AUTH_GOOGLE_SECRET`
+   - `AUTH_URL`: `https://<project-slug>.vercel.app`
+   - `PRIVATE_ROOM_CODE`: fresh production room code
+   - `ADMIN_EMAILS`
+   - `ALLOWLIST_ENABLED=true`
+   - `DEFAULT_CUTOFF_MINUTES=60`
+5. Do not configure Preview envs for v1. Preview deployments are intentionally unsupported until a separate preview-safe setup exists.
+
+### Reusing The Current Neon Database
+
+If you are reusing the current Neon database for production, back it up first, then clean launch-only data:
 
 ```bash
-pnpm db:migrate
+CONFIRM_LAUNCH_CLEAN=YES_DELETE_LAUNCH_DATA pnpm db:launch-clean
+```
+
+This removes `User`, `Account`, `Session`, `RoomMembership`, `Prediction`, `AuditLog`, and `VerificationToken` data while keeping seeded teams, fixtures, room, app config, and allowlist entries intact.
+
+### Production Migrations And Seed
+
+Run these against the production environment values:
+
+```bash
+pnpm db:deploy
 pnpm seed:ipl
 ```
 
-6. Log in with an admin email and verify:
-   - the room code matches `PRIVATE_ROOM_CODE`
+Use `pnpm db:deploy` in production. Do not use `pnpm db:migrate`, because that runs `prisma migrate dev`.
+
+### Production Smoke Test
+
+After the first production deploy:
+
+1. Visit the production `vercel.app` URL.
+2. Sign in with an admin email.
+3. Join with the production room code.
+4. Verify:
+   - landing page and login work
+   - room join works
    - fixtures exist
    - allowlist/config values are correct
+   - dashboard, matches, leaderboard, history, and admin pages load
 
 ## Project Scripts
 
@@ -173,7 +212,9 @@ pnpm seed:ipl
 - `pnpm test:unit`: unit tests only
 - `pnpm test:integration`: integration tests only
 - `pnpm db:generate`: Prisma client generation
+- `pnpm db:deploy`: production Prisma migration deploy
 - `pnpm db:migrate`: local Prisma migration command
+- `pnpm db:launch-clean`: remove launch-only users, sessions, memberships, predictions, and audit logs
 - `pnpm db:studio`: Prisma Studio
 - `pnpm seed:ipl`: seed room, config, teams, and fixtures
 
