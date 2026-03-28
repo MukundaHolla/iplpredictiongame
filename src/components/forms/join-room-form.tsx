@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { LoaderCircle, ShieldCheck } from "lucide-react";
+import { LoaderCircle, LogOut, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { signOutAction } from "@/actions/auth-actions";
 import { joinRoomAction } from "@/actions/join-room";
 import { useAppLoading } from "@/components/providers/app-loading-provider";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ export function JoinRoomForm({ allowlistEnabled }: JoinRoomFormProps) {
   const { beginLoading, endLoading } = useAppLoading();
   const [code, setCode] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [isSigningOut, startSignOutTransition] = useTransition();
 
   return (
     <form
@@ -67,11 +69,43 @@ export function JoinRoomForm({ allowlistEnabled }: JoinRoomFormProps) {
       </div>
       <Button
         type="submit"
-        disabled={isPending || code.trim().length < 4}
+        disabled={isPending || isSigningOut || code.trim().length < 4}
         className="h-12 w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700"
       >
         {isPending ? <LoaderCircle className="size-4 animate-spin" /> : "Join Private Room"}
       </Button>
+      <div className="space-y-3">
+        <p className="text-center text-sm text-slate-500">
+          Signed in with a different Google account? Sign out and try again with the invited
+          email.
+        </p>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isPending || isSigningOut}
+          onClick={() => {
+            beginLoading("Switching accounts");
+
+            startSignOutTransition(async () => {
+              try {
+                await signOutAction();
+              } finally {
+                endLoading();
+              }
+            });
+          }}
+          className="h-12 w-full rounded-xl border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+        >
+          {isSigningOut ? (
+            <LoaderCircle className="size-4 animate-spin" />
+          ) : (
+            <>
+              <LogOut className="size-4" />
+              Sign Out
+            </>
+          )}
+        </Button>
+      </div>
     </form>
   );
 }
