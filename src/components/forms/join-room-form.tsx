@@ -15,9 +15,13 @@ import { isNextRedirectError } from "@/lib/is-next-redirect-error";
 
 type JoinRoomFormProps = {
   helperText?: string;
+  submitLabel?: string;
 };
 
-export function JoinRoomForm({ helperText }: JoinRoomFormProps) {
+export function JoinRoomForm({
+  helperText,
+  submitLabel = "Join Room",
+}: JoinRoomFormProps) {
   const router = useRouter();
   const { beginLoading, endLoading } = useAppLoading();
   const [code, setCode] = useState("");
@@ -72,7 +76,7 @@ export function JoinRoomForm({ helperText }: JoinRoomFormProps) {
         disabled={isPending || isSigningOut || code.trim().length < 4}
         className="h-12 w-full rounded-xl bg-blue-600 text-white hover:bg-blue-700"
       >
-        {isPending ? <LoaderCircle className="size-4 animate-spin" /> : "Join Private Room"}
+        {isPending ? <LoaderCircle className="size-4 animate-spin" /> : submitLabel}
       </Button>
       <div className="space-y-3">
         <p className="text-center text-sm text-slate-500">

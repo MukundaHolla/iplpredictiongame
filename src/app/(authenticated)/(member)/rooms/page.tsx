@@ -10,6 +10,7 @@ import { getRoomsHomeView } from "@/server/services/query-service";
 export default async function RoomsPage() {
   const user = await requireAuthenticatedUser();
   const roomsHome = await getRoomsHomeView(user.id);
+  const hasRooms = roomsHome.rooms.length > 0;
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-24 lg:pb-8">
@@ -21,11 +22,12 @@ export default async function RoomsPage() {
             </p>
             <div className="space-y-2">
               <h1 className="font-heading text-3xl text-slate-900 sm:text-4xl">
-                Choose your room
+                {hasRooms ? "Choose your room" : "Join your first room"}
               </h1>
               <p className="max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-                Switch between private groups, keep separate leaderboards, and join another room
-                any time with a code from that room&apos;s admin.
+                {hasRooms
+                  ? "Switch between private groups, keep separate leaderboards, and join another room any time with a code from that room's admin."
+                  : "Get a room code from the admin, join your first private group, and start making picks for match day."}
               </p>
             </div>
           </div>
@@ -41,7 +43,7 @@ export default async function RoomsPage() {
             >
               <LoadingLink href="/join-room" message="Opening join room">
                 <PlusCircle className="size-4" />
-                Join another room
+                {hasRooms ? "Join another room" : "Join room"}
               </LoadingLink>
             </Button>
           </div>

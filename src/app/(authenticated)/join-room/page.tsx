@@ -10,6 +10,7 @@ import { getRoomDashboardPath } from "@/lib/rooms";
 export default async function JoinRoomPage() {
   const user = await requireAuthenticatedUser();
   const { memberships } = await getRoomStateForUser(user.id);
+  const hasRooms = memberships.length > 0;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-2xl items-center justify-center px-4 py-12">
@@ -23,9 +24,13 @@ export default async function JoinRoomPage() {
           <p className="font-heading text-sm uppercase tracking-[0.28em] text-blue-600">
             Private Room
           </p>
-          <h1 className="font-heading text-4xl text-slate-900">Enter the room code</h1>
+          <h1 className="font-heading text-4xl text-slate-900">
+            {hasRooms ? "Join another room" : "Join a room"}
+          </h1>
           <p className="text-base text-slate-600">
-            Ask the room admin for the private room code. Once you join, that room gets its own leaderboard, picks, and invite list.
+            {hasRooms
+              ? "Ask the room admin for another private room code. Each room keeps its own leaderboard, picks, and invite list."
+              : "Ask the room admin for the private room code to join your first room and start making picks."}
           </p>
         </div>
         {memberships.length > 0 ? (
@@ -50,7 +55,7 @@ export default async function JoinRoomPage() {
             </div>
           </div>
         ) : null}
-        <JoinRoomForm />
+        <JoinRoomForm submitLabel={hasRooms ? "Join Another Room" : "Join Room"} />
       </div>
     </div>
   );
