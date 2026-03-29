@@ -353,7 +353,7 @@ export async function getHistoryView(userId: string, roomSlug: string): Promise<
     })
     .sort(
       (left, right) =>
-        new Date(right.startTimeUtc).getTime() - new Date(left.startTimeUtc).getTime(),
+        new Date(left.startTimeUtc).getTime() - new Date(right.startTimeUtc).getTime(),
     );
 }
 
