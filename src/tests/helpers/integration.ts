@@ -31,6 +31,8 @@ export async function getIntegrationModules() {
     getLeaderboardRows: leaderboardService.getLeaderboardRows,
     predictionRepository: predictionRepo.predictionRepository,
     settleFixtureResult: adminService.settleFixtureResult,
+    removeRoomMember: adminService.removeRoomMember,
+    restoreRoomMember: adminService.restoreRoomMember,
   };
 }
 

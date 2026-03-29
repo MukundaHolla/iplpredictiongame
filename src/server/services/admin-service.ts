@@ -1,11 +1,13 @@
 import { MatchStage, MatchStatus } from "@prisma/client";
 
 import seedData from "../../../prisma/seed-data/ipl-2026.json";
+import type { AdminRoomMemberView } from "@/lib/types";
 import { calculateCutoffTime, parseIstDateTimeInput } from "@/lib/time";
 import { slugifyRoomName } from "@/lib/rooms";
 import {
   adminAllowlistRemoveSchema,
   adminAllowlistToggleSchema,
+  adminRoomMemberUpdateSchema,
   adminAllowlistUpsertSchema,
   adminConfigSchema,
   adminMatchUpdateSchema,
@@ -17,6 +19,7 @@ import { auditRepository } from "@/server/repositories/audit-repository";
 import { configRepository } from "@/server/repositories/config-repository";
 import { matchRepository } from "@/server/repositories/match-repository";
 import { roomRepository } from "@/server/repositories/room-repository";
+import { userRepository } from "@/server/repositories/user-repository";
 import { getLeaderboardRows } from "@/server/services/leaderboard-service";
 import { ensureSystemReady } from "@/server/services/system-service";
 
@@ -40,6 +43,21 @@ async function getRoomOrThrow(roomSlug: string) {
   }
 
   return room;
+}
+
+function toAdminRoomMemberView(
+  membership: Awaited<ReturnType<typeof roomRepository.listMemberships>>[number],
+): AdminRoomMemberView {
+  return {
+    userId: membership.userId,
+    name: membership.user.name ?? membership.user.email ?? "Anonymous Player",
+    email: membership.user.email ?? null,
+    image: membership.user.image ?? null,
+    role: membership.user.role,
+    joinedAt: membership.joinedAt.toISOString(),
+    removedAt: membership.removedAt?.toISOString() ?? null,
+    isActive: membership.isActive,
+  };
 }
 
 export async function seedFixtures(actorUserId: string) {
@@ -314,6 +332,89 @@ export async function removeAllowedEmail(actorUserId: string, input: unknown) {
   return record;
 }
 
+export async function removeRoomMember(actorUserId: string, input: unknown) {
+  const parsed = adminRoomMemberUpdateSchema.parse(input);
+  const room = await getRoomOrThrow(parsed.roomSlug);
+  const membership = await roomRepository.getMembershipForUser(parsed.userId, room.id);
+
+  if (!membership) {
+    throw new Error("That player is not part of this room.");
+  }
+
+  if (!membership.isActive) {
+    throw new Error("That player is already removed from this room.");
+  }
+
+  const removedAt = new Date();
+
+  const updatedMembership = await roomRepository.updateMembershipState({
+    roomId: room.id,
+    userId: parsed.userId,
+    isActive: false,
+    removedAt,
+  });
+
+  const fallbackMemberships = await roomRepository.getUserMemberships(parsed.userId);
+  await userRepository.updateLastRoom(parsed.userId, fallbackMemberships[0]?.roomId ?? null);
+
+  await auditRepository.create({
+    actorUserId,
+    action: "ROOM_MEMBER_REMOVED",
+    entityType: "RoomMembership",
+    entityId: updatedMembership.id,
+    payload: {
+      roomSlug: room.slug,
+      targetUserId: updatedMembership.userId,
+      targetEmail: updatedMembership.user.email ?? null,
+      removedAt: removedAt.toISOString(),
+    },
+  });
+
+  return updatedMembership;
+}
+
+export async function restoreRoomMember(actorUserId: string, input: unknown) {
+  const parsed = adminRoomMemberUpdateSchema.parse(input);
+  const room = await getRoomOrThrow(parsed.roomSlug);
+  const membership = await roomRepository.getMembershipForUser(parsed.userId, room.id);
+
+  if (!membership) {
+    throw new Error("That player has no recorded membership for this room.");
+  }
+
+  if (membership.isActive) {
+    throw new Error("That player is already active in this room.");
+  }
+
+  const restoredMembership = await roomRepository.updateMembershipState({
+    roomId: room.id,
+    userId: parsed.userId,
+    isActive: true,
+    removedAt: null,
+  });
+
+  const user = await userRepository.getUserById(parsed.userId);
+
+  if (user && !user.lastRoomId) {
+    await userRepository.updateLastRoom(parsed.userId, room.id);
+  }
+
+  await auditRepository.create({
+    actorUserId,
+    action: "ROOM_MEMBER_RESTORED",
+    entityType: "RoomMembership",
+    entityId: restoredMembership.id,
+    payload: {
+      roomSlug: room.slug,
+      targetUserId: restoredMembership.userId,
+      targetEmail: restoredMembership.user.email ?? null,
+      restoredJoinedAt: restoredMembership.joinedAt.toISOString(),
+    },
+  });
+
+  return restoredMembership;
+}
+
 export async function recalculateLeaderboard(actorUserId: string, roomSlug: string) {
   const room = await getRoomOrThrow(roomSlug);
   const leaderboard = await getLeaderboardRows(room.id);
@@ -366,16 +467,30 @@ export async function getAdminRoomOverviewData(roomSlug: string) {
     getAppConfigOrThrow(),
     configRepository.listAllowedEmails(room.id),
     auditRepository.listRecent(),
-    roomRepository.listMemberships(room.id),
+    roomRepository.listMemberships(room.id, { includeInactive: true }),
     getLeaderboardRows(room.id),
   ]);
+
+  const activeMembers = memberships
+    .filter((membership) => membership.isActive)
+    .map(toAdminRoomMemberView);
+  const removedMembers = memberships
+    .filter((membership) => !membership.isActive)
+    .sort(
+      (left, right) =>
+        (right.removedAt?.getTime() ?? 0) - (left.removedAt?.getTime() ?? 0),
+    )
+    .map(toAdminRoomMemberView);
 
   return {
     room,
     config,
     allowlist,
     audits,
-    membershipCount: memberships.length,
+    membershipCount: activeMembers.length,
+    removedMemberCount: removedMembers.length,
+    activeMembers,
+    removedMembers,
     leaderboard: leaderboard.slice(0, 5),
   };
 }

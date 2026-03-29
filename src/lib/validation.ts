@@ -88,3 +88,8 @@ export const adminAllowlistRemoveSchema = z.object({
   roomSlug: z.string().trim().min(1),
   id: z.string().trim().min(1),
 });
+
+export const adminRoomMemberUpdateSchema = z.object({
+  roomSlug: z.string().trim().min(1),
+  userId: z.string().trim().min(1),
+});

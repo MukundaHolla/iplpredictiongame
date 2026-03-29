@@ -15,6 +15,8 @@ import {
   createRoom,
   recalculateLeaderboard,
   removeAllowedEmail,
+  removeRoomMember,
+  restoreRoomMember,
   seedFixtures,
   settleFixtureResult,
   toggleAllowedEmail,
@@ -235,6 +237,62 @@ export async function adminRemoveAllowedEmailAction(input: unknown): Promise<Act
     return {
       success: true,
       message: "Allowlist entry removed.",
+    };
+  } catch (error) {
+    return toActionFailure(error);
+  }
+}
+
+export async function adminRemoveRoomMemberAction(input: unknown): Promise<ActionResult> {
+  try {
+    const actorUserId = await getAdminUserId();
+    await removeRoomMember(actorUserId, input);
+
+    const roomSlug =
+      typeof input === "object" &&
+      input !== null &&
+      "roomSlug" in input &&
+      typeof input.roomSlug === "string"
+        ? input.roomSlug
+        : null;
+
+    await revalidateAppPaths(
+      roomSlug
+        ? ["/rooms", ...getRoomScopedPaths(roomSlug), getRoomAdminOverviewPath(roomSlug)]
+        : ["/rooms", "/admin"],
+    );
+
+    return {
+      success: true,
+      message: "Player removed from the room.",
+    };
+  } catch (error) {
+    return toActionFailure(error);
+  }
+}
+
+export async function adminRestoreRoomMemberAction(input: unknown): Promise<ActionResult> {
+  try {
+    const actorUserId = await getAdminUserId();
+    await restoreRoomMember(actorUserId, input);
+
+    const roomSlug =
+      typeof input === "object" &&
+      input !== null &&
+      "roomSlug" in input &&
+      typeof input.roomSlug === "string"
+        ? input.roomSlug
+        : null;
+
+    await revalidateAppPaths(
+      roomSlug
+        ? ["/rooms", ...getRoomScopedPaths(roomSlug), getRoomAdminOverviewPath(roomSlug)]
+        : ["/rooms", "/admin"],
+    );
+
+    return {
+      success: true,
+      message: "Player added back to the room.",
     };
   } catch (error) {
     return toActionFailure(error);

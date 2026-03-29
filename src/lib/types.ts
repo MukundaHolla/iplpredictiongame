@@ -127,3 +127,14 @@ export type AdminRoomListItemView = {
   memberCount: number;
   inviteCount: number;
 };
+
+export type AdminRoomMemberView = {
+  userId: string;
+  name: string;
+  email: string | null;
+  image: string | null;
+  role: "USER" | "ADMIN";
+  joinedAt: string;
+  removedAt: string | null;
+  isActive: boolean;
+};

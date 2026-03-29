@@ -122,6 +122,12 @@ export async function joinRoomByCode(userId: string, code: string) {
     throw new Error("This room is currently inactive.");
   }
 
+  const existingMembership = await roomRepository.getMembershipForUser(userId, room.id);
+
+  if (existingMembership && !existingMembership.isActive) {
+    throw new Error("You’re no longer active in this room. Ask an admin to add you back.");
+  }
+
   if (room.allowlistEnabled) {
     if (!user.email) {
       throw new Error("Your Google account does not expose an email address.");

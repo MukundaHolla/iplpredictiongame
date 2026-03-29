@@ -73,14 +73,17 @@ model Room {
 }
 
 model RoomMembership {
-  id       String   @id @default(cuid())
-  roomId   String
-  userId   String
-  joinedAt DateTime @default(now())
-  room     Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String    @id @default(cuid())
+  roomId    String
+  userId    String
+  joinedAt  DateTime  @default(now())
+  isActive  Boolean   @default(true)
+  removedAt DateTime?
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
+  @@index([roomId, isActive])
   @@index([userId])
   @@index([joinedAt])
 }

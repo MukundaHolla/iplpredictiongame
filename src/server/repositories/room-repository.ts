@@ -51,7 +51,11 @@ export const roomRepository = {
       include: {
         _count: {
           select: {
-            memberships: true,
+            memberships: {
+              where: {
+                isActive: true,
+              },
+            },
             predictions: true,
             allowedEmails: true,
           },
@@ -75,7 +79,11 @@ export const roomRepository = {
       include: {
         _count: {
           select: {
-            memberships: true,
+            memberships: {
+              where: {
+                isActive: true,
+              },
+            },
             predictions: true,
             allowedEmails: true,
           },
@@ -107,9 +115,12 @@ export const roomRepository = {
     });
   },
 
-  getUserMemberships(userId: string) {
+  getUserMemberships(userId: string, options?: { includeInactive?: boolean }) {
     return db.roomMembership.findMany({
-      where: { userId },
+      where: {
+        userId,
+        ...(options?.includeInactive ? {} : { isActive: true }),
+      },
       include: {
         room: true,
       },
@@ -133,15 +144,25 @@ export const roomRepository = {
   },
 
   async joinRoom(roomId: string, userId: string) {
-    return db.roomMembership.upsert({
+    const existingMembership = await db.roomMembership.findUnique({
       where: {
         roomId_userId: {
           roomId,
           userId,
         },
       },
-      update: {},
-      create: {
+      include: {
+        room: true,
+        user: true,
+      },
+    });
+
+    if (existingMembership) {
+      return existingMembership;
+    }
+
+    return db.roomMembership.create({
+      data: {
         roomId,
         userId,
       },
@@ -152,13 +173,40 @@ export const roomRepository = {
     });
   },
 
-  listMemberships(roomId: string) {
+  listMemberships(roomId: string, options?: { includeInactive?: boolean }) {
     return db.roomMembership.findMany({
-      where: { roomId },
+      where: {
+        roomId,
+        ...(options?.includeInactive ? {} : { isActive: true }),
+      },
       include: {
         user: true,
       },
       orderBy: { joinedAt: "asc" },
+    });
+  },
+
+  updateMembershipState(input: {
+    roomId: string;
+    userId: string;
+    isActive: boolean;
+    removedAt: Date | null;
+  }) {
+    return db.roomMembership.update({
+      where: {
+        roomId_userId: {
+          roomId: input.roomId,
+          userId: input.userId,
+        },
+      },
+      data: {
+        isActive: input.isActive,
+        removedAt: input.removedAt,
+      },
+      include: {
+        room: true,
+        user: true,
+      },
     });
   },
 

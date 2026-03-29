@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   getUserById: vi.fn(),
   getRoomByCode: vi.fn(),
+  getMembershipForUser: vi.fn(),
   joinRoom: vi.fn(),
   updateLastRoom: vi.fn(),
   findAllowedEmail: vi.fn(),
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/server/repositories/room-repository", () => ({
   roomRepository: {
     getRoomByCode: mocks.getRoomByCode,
+    getMembershipForUser: mocks.getMembershipForUser,
     joinRoom: mocks.joinRoom,
   },
 }));
@@ -66,6 +68,7 @@ describe("joinRoomByCode", () => {
       room: { id: "room_1", slug: "friends-room" },
       user: { id: "user_1" },
     });
+    mocks.getMembershipForUser.mockResolvedValue(null);
   });
 
   it("joins successfully when the code matches and room allowlist is off", async () => {
@@ -116,5 +119,18 @@ describe("joinRoomByCode", () => {
     );
     expect(mocks.joinRoom).toHaveBeenCalledWith("room_2", "user_1");
     expect(mocks.updateLastRoom).toHaveBeenCalledWith("user_1", "room_2");
+  });
+
+  it("blocks self-rejoin when the player was removed and must be restored by an admin", async () => {
+    mocks.getMembershipForUser.mockResolvedValue({
+      id: "membership_1",
+      roomId: "room_1",
+      userId: "user_1",
+      isActive: false,
+    });
+
+    await expect(joinRoomByCode("user_1", "MYIPL2026")).rejects.toThrow(
+      "Ask an admin to add you back",
+    );
   });
 });

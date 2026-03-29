@@ -1,6 +1,7 @@
 import { Activity, ArrowRight, CalendarClock, ShieldCheck, Trophy, Users } from "lucide-react";
 
 import { AllowlistPanel } from "@/components/admin/allowlist-panel";
+import { RoomPlayersPanel } from "@/components/admin/room-players-panel";
 import { LoadingLink } from "@/components/navigation/loading-link";
 import { PageBackButton } from "@/components/navigation/page-back-button";
 import { RoomSettingsPanel } from "@/components/admin/room-settings-panel";
@@ -32,13 +33,19 @@ export default async function RoomAdminOverviewPage({
         description="This room keeps its own code, invite list, and leaderboard while sharing the same IPL fixture set."
       />
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-4">
         {[
           {
             icon: Users,
             label: "Members",
             value: String(data.membershipCount),
             copy: "Players currently joined to this room.",
+          },
+          {
+            icon: Users,
+            label: "Removed",
+            value: String(data.removedMemberCount),
+            copy: "Players who can be added back in their original room order.",
           },
           {
             icon: ShieldCheck,
@@ -112,6 +119,11 @@ export default async function RoomAdminOverviewPage({
           isActive: data.room.isActive,
           allowlistEnabled: data.room.allowlistEnabled,
         }}
+      />
+      <RoomPlayersPanel
+        roomSlug={roomSlug}
+        activeMembers={data.activeMembers}
+        removedMembers={data.removedMembers}
       />
       <AllowlistPanel roomSlug={roomSlug} entries={data.allowlist} />
 

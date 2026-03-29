@@ -170,22 +170,27 @@ export async function getDashboardView(userId: string, roomSlug: string): Promis
   }
 
   const now = new Date();
-  const [matches, roomPredictions, userRank, joinedRooms] = await Promise.all([
+  const [matches, roomPredictions, activeMemberships, userRank, joinedRooms] = await Promise.all([
     matchRepository.listMatches(),
     predictionRepository.listRoomPredictions(room.id),
+    roomRepository.listMemberships(room.id),
     getLeaderboardPositionForUser(user.id, room.id),
     getJoinedRoomSummaries(memberships),
   ]);
+  const activeUserIds = new Set(activeMemberships.map((membership) => membership.userId));
+  const activeRoomPredictions = roomPredictions.filter((prediction) =>
+    activeUserIds.has(prediction.userId),
+  );
 
   const userPredictionsByMatch = new Map<string, PredictionRecord>(
-    roomPredictions
+    activeRoomPredictions
       .filter((prediction) => prediction.userId === userId)
       .map((prediction) => [prediction.matchId, prediction]),
   );
 
   const predictionsByMatch = new Map<string, PredictionRecord[]>();
 
-  for (const prediction of roomPredictions) {
+  for (const prediction of activeRoomPredictions) {
     const current = predictionsByMatch.get(prediction.matchId) ?? [];
     current.push(prediction);
     predictionsByMatch.set(prediction.matchId, current);
@@ -250,20 +255,25 @@ export async function getAllMatchesView(userId: string, roomSlug: string) {
   }
 
   const now = new Date();
-  const [matches, roomPredictions] = await Promise.all([
+  const [matches, roomPredictions, activeMemberships] = await Promise.all([
     matchRepository.listMatches(),
     predictionRepository.listRoomPredictions(room.id),
+    roomRepository.listMemberships(room.id),
   ]);
+  const activeUserIds = new Set(activeMemberships.map((membership) => membership.userId));
+  const activeRoomPredictions = roomPredictions.filter((prediction) =>
+    activeUserIds.has(prediction.userId),
+  );
 
   const userPredictionsByMatch = new Map<string, PredictionRecord>(
-    roomPredictions
+    activeRoomPredictions
       .filter((prediction) => prediction.userId === userId)
       .map((prediction) => [prediction.matchId, prediction]),
   );
 
   const predictionsByMatch = new Map<string, PredictionRecord[]>();
 
-  for (const prediction of roomPredictions) {
+  for (const prediction of activeRoomPredictions) {
     const current = predictionsByMatch.get(prediction.matchId) ?? [];
     current.push(prediction);
     predictionsByMatch.set(prediction.matchId, current);
