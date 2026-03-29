@@ -84,7 +84,7 @@ export function PredictionSelector({
               className={cn(
                 "h-14 rounded-2xl border text-left transition-all duration-200",
                 isSelected
-                  ? "border-blue-300 bg-blue-50 text-blue-700 shadow-sm shadow-blue-100"
+                  ? "border-emerald-300 bg-emerald-50 text-emerald-700 shadow-sm shadow-emerald-100"
                   : "border-slate-200 bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50/60",
               )}
             >

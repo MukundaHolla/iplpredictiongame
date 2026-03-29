@@ -37,7 +37,7 @@ export default async function RoomMatchesPage({
           description="These are the fixtures you can act on today or follow after the cutoff."
         />
         {activeMatches.length > 0 ? (
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid gap-6 2xl:grid-cols-2">
             {activeMatches.map((match, index) => (
               <MatchCard key={match.id} roomSlug={roomSlug} match={match} index={index} />
             ))}
@@ -75,7 +75,7 @@ export default async function RoomMatchesPage({
           description="Completed, abandoned, and no-result fixtures all stay here for reference."
         />
         {settledMatches.length > 0 ? (
-          <div className="grid gap-6 xl:grid-cols-2">
+          <div className="grid gap-6 2xl:grid-cols-2">
             {settledMatches.map((match, index) => (
               <MatchCard key={match.id} roomSlug={roomSlug} match={match} index={index} />
             ))}

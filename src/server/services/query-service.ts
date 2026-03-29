@@ -228,6 +228,7 @@ export async function getDashboardView(userId: string, roomSlug: string): Promis
     ),
     upcoming: matchCards.filter(
       (match) =>
+        new Date(match.startTimeUtc).getTime() > now.getTime() &&
         getIstDateKey(new Date(match.startTimeUtc)) !== todayKey &&
         !settledStatuses.has(match.status),
     ),
