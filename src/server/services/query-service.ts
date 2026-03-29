@@ -16,6 +16,7 @@ import type {
   MatchCardView,
   MatchDistributionView,
   MatchIndividualPickView,
+  RoomPicksView,
   RoomSummaryView,
   RoomsHomeView,
 } from "@/lib/types";
@@ -103,7 +104,7 @@ function toMatchCardView(
 ): MatchCardView {
   const effectiveStatus = getEffectiveMatchStatus(match, now);
   const revealAggregate = canRevealAggregate(revealMode, match, now);
-  const revealIndividualPicks = canRevealIndividualPicks(match);
+  const revealIndividualPicks = canRevealIndividualPicks(match, now);
   const canPredictToday =
     canSubmitPrediction(now, match.startTimeUtc, match.cutoffTimeUtc) &&
     effectiveStatus === MatchStatus.SCHEDULED;
@@ -154,28 +155,22 @@ function toMatchCardView(
       : getCountdownLabel(match.cutoffTimeUtc, now),
     revealAggregate,
     revealIndividualPicks,
+    showRoomPicksDisclosure: revealIndividualPicks,
     distribution: revealAggregate ? buildDistribution(match, predictionsForMatch) : null,
     individualPicks: revealIndividualPicks ? buildIndividualPicks(predictionsForMatch) : [],
   };
 }
 
-export async function getDashboardView(userId: string, roomSlug: string): Promise<DashboardView> {
-  const { room, membership, memberships, config, user } = await getRoomContextForUser(
-    userId,
-    roomSlug,
-  );
-
-  if (!membership) {
-    throw new Error("You must join this room before viewing its dashboard.");
-  }
-
-  const now = new Date();
-  const [matches, roomPredictions, activeMemberships, userRank, joinedRooms] = await Promise.all([
+async function getRoomMatchCardsForUser(
+  userId: string,
+  roomId: string,
+  revealMode: DashboardView["revealMode"],
+  now: Date,
+) {
+  const [matches, roomPredictions, activeMemberships] = await Promise.all([
     matchRepository.listMatches(),
-    predictionRepository.listRoomPredictions(room.id),
-    roomRepository.listMemberships(room.id),
-    getLeaderboardPositionForUser(user.id, room.id),
-    getJoinedRoomSummaries(memberships),
+    predictionRepository.listRoomPredictions(roomId),
+    roomRepository.listMemberships(roomId),
   ]);
   const activeUserIds = new Set(activeMemberships.map((membership) => membership.userId));
   const activeRoomPredictions = roomPredictions.filter((prediction) =>
@@ -196,17 +191,35 @@ export async function getDashboardView(userId: string, roomSlug: string): Promis
     predictionsByMatch.set(prediction.matchId, current);
   }
 
-  const todayKey = getIstDateKey(now);
-  const matchCards = matches.map((match) =>
+  return matches.map((match) =>
     toMatchCardView(
       match,
       userPredictionsByMatch.get(match.id)?.predictedTeamId ?? null,
       userPredictionsByMatch.get(match.id)?.submittedAt ?? null,
       predictionsByMatch.get(match.id) ?? [],
-      config.predictionsRevealMode,
+      revealMode,
       now,
     ),
   );
+}
+
+export async function getDashboardView(userId: string, roomSlug: string): Promise<DashboardView> {
+  const { room, membership, memberships, config, user } = await getRoomContextForUser(
+    userId,
+    roomSlug,
+  );
+
+  if (!membership) {
+    throw new Error("You must join this room before viewing its dashboard.");
+  }
+
+  const now = new Date();
+  const [matchCards, userRank, joinedRooms] = await Promise.all([
+    getRoomMatchCardsForUser(user.id, room.id, config.predictionsRevealMode, now),
+    getLeaderboardPositionForUser(user.id, room.id),
+    getJoinedRoomSummaries(memberships),
+  ]);
+  const todayKey = getIstDateKey(now);
 
   const settledStatuses = new Set<MatchStatus>([
     MatchStatus.COMPLETED,
@@ -255,40 +268,7 @@ export async function getAllMatchesView(userId: string, roomSlug: string) {
   }
 
   const now = new Date();
-  const [matches, roomPredictions, activeMemberships] = await Promise.all([
-    matchRepository.listMatches(),
-    predictionRepository.listRoomPredictions(room.id),
-    roomRepository.listMemberships(room.id),
-  ]);
-  const activeUserIds = new Set(activeMemberships.map((membership) => membership.userId));
-  const activeRoomPredictions = roomPredictions.filter((prediction) =>
-    activeUserIds.has(prediction.userId),
-  );
-
-  const userPredictionsByMatch = new Map<string, PredictionRecord>(
-    activeRoomPredictions
-      .filter((prediction) => prediction.userId === userId)
-      .map((prediction) => [prediction.matchId, prediction]),
-  );
-
-  const predictionsByMatch = new Map<string, PredictionRecord[]>();
-
-  for (const prediction of activeRoomPredictions) {
-    const current = predictionsByMatch.get(prediction.matchId) ?? [];
-    current.push(prediction);
-    predictionsByMatch.set(prediction.matchId, current);
-  }
-
-  return matches.map((match) =>
-    toMatchCardView(
-      match,
-      userPredictionsByMatch.get(match.id)?.predictedTeamId ?? null,
-      userPredictionsByMatch.get(match.id)?.submittedAt ?? null,
-      predictionsByMatch.get(match.id) ?? [],
-      config.predictionsRevealMode,
-      now,
-    ),
-  );
+  return getRoomMatchCardsForUser(userId, room.id, config.predictionsRevealMode, now);
 }
 
 export async function getHistoryView(userId: string, roomSlug: string): Promise<HistoryRowView[]> {
@@ -375,6 +355,50 @@ export async function getLeaderboardView(userId: string, roomSlug: string) {
   }
 
   return getLeaderboardRows(room.id);
+}
+
+export async function getTodayRoomPicksView(
+  userId: string,
+  roomSlug: string,
+): Promise<RoomPicksView> {
+  const { room, membership, memberships, config } = await getRoomContextForUser(
+    userId,
+    roomSlug,
+  );
+
+  if (!membership) {
+    throw new Error("You must join this room before viewing room picks.");
+  }
+
+  const now = new Date();
+  const todayKey = getIstDateKey(now);
+  const joinedRooms = await getJoinedRoomSummaries(memberships);
+  const currentRoom = joinedRooms.find((joinedRoom) => joinedRoom.id === room.id);
+
+  if (!currentRoom) {
+    throw new Error("Room membership is missing from the available rooms list.");
+  }
+
+  const matches = (await getRoomMatchCardsForUser(
+    userId,
+    room.id,
+    config.predictionsRevealMode,
+    now,
+  ))
+    .filter(
+      (match) =>
+        match.showRoomPicksDisclosure &&
+        getIstDateKey(new Date(match.startTimeUtc)) === todayKey,
+    )
+    .sort(
+      (left, right) =>
+        new Date(left.startTimeUtc).getTime() - new Date(right.startTimeUtc).getTime(),
+    );
+
+  return {
+    room: currentRoom,
+    matches,
+  };
 }
 
 export async function getRoomsHomeView(userId: string): Promise<RoomsHomeView> {

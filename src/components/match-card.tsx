@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { upsertPredictionAction } from "@/actions/predictions";
 import { ConfettiBurst } from "@/components/confetti-burst";
 import { CountdownTimer } from "@/components/countdown-timer";
+import { RoomPicksPanel } from "@/components/room-picks-panel";
 import { TeamBadge } from "@/components/team-badge";
 import { useAppLoading } from "@/components/providers/app-loading-provider";
 import { Badge } from "@/components/ui/badge";
@@ -205,6 +206,8 @@ export function MatchCard({
                   <span>Cutoff {formatMatchDateTime(new Date(match.cutoffTimeUtc)).time}</span>
                 </span>
               </div>
+
+              <RoomPicksPanel match={match} collapsible />
             </div>
 
             <Button
@@ -301,6 +304,8 @@ export function MatchCard({
               </div>
             </div>
 
+            <RoomPicksPanel match={match} collapsible />
+
             <div className="flex items-center justify-between gap-3">
               {!pickedTeamShortCode ? (
                 <p className="text-sm font-medium text-slate-700">
@@ -352,21 +357,6 @@ export function MatchCard({
               </div>
             ) : null}
 
-            {match.revealIndividualPicks && match.individualPicks.length > 0 ? (
-              <div className="space-y-2 rounded-3xl border border-slate-200 bg-slate-50 p-4">
-                <p className="text-sm font-medium text-slate-900">Friends&apos; picks</p>
-                <div className="flex flex-wrap gap-2">
-                  {match.individualPicks.map((pick) => (
-                    <span
-                      key={`${match.id}-${pick.userId}`}
-                      className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600"
-                    >
-                      {pick.name} · {pick.pickedTeamShortCode}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </div>
         </Card>
       </motion.div>

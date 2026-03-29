@@ -1,11 +1,12 @@
 "use client";
 
 import Link, { type LinkProps } from "next/link";
-import type { MouseEvent, ReactNode } from "react";
+import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
 
 import { useAppLoading } from "@/components/providers/app-loading-provider";
 
-type LoadingLinkProps = LinkProps & {
+type LoadingLinkProps = LinkProps &
+  Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof LinkProps> & {
   children: ReactNode;
   className?: string;
   message?: string;

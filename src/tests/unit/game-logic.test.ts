@@ -1,6 +1,7 @@
 import { MatchStage, MatchStatus } from "@prisma/client";
 
 import {
+  canRevealIndividualPicks,
   canSubmitPrediction,
   computeLeaderboard,
   getPredictionAvailabilityLabel,
@@ -61,6 +62,23 @@ describe("game logic", () => {
         now,
       ),
     ).toBe("Predictions open on 3 Apr");
+  });
+
+  it("reveals room picks from the start of the match day onward", () => {
+    const match = {
+      id: "m1",
+      matchNumber: 1,
+      stage: MatchStage.LEAGUE,
+      status: MatchStatus.SCHEDULED,
+      startTimeUtc: new Date("2026-03-29T14:00:00.000Z"),
+      cutoffTimeUtc: new Date("2026-03-29T13:00:00.000Z"),
+      winningTeamId: null,
+      settledAt: null,
+    };
+
+    expect(canRevealIndividualPicks(match, new Date("2026-03-28T18:29:59.000Z"))).toBe(false);
+    expect(canRevealIndividualPicks(match, new Date("2026-03-28T18:30:00.000Z"))).toBe(true);
+    expect(canRevealIndividualPicks(match, new Date("2026-03-30T12:00:00.000Z"))).toBe(true);
   });
 
   it("computes leaderboard points, accuracy, missed picks, and late-join filtering", () => {

@@ -67,6 +67,7 @@ export type MatchCardView = {
   countdownLabel: string;
   revealAggregate: boolean;
   revealIndividualPicks: boolean;
+  showRoomPicksDisclosure: boolean;
   distribution: MatchDistributionView | null;
   individualPicks: MatchIndividualPickView[];
 };
@@ -85,6 +86,11 @@ export type DashboardView = {
 export type RoomsHomeView = {
   currentRoomSlug: string | null;
   rooms: RoomSummaryView[];
+};
+
+export type RoomPicksView = {
+  room: RoomSummaryView;
+  matches: MatchCardView[];
 };
 
 export type LeaderboardRowView = {

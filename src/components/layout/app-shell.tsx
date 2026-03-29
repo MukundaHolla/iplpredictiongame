@@ -12,6 +12,7 @@ import {
   Plus,
   Settings2,
   Trophy,
+  Users,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -36,6 +37,7 @@ import {
   getRoomHistoryPath,
   getRoomLeaderboardPath,
   getRoomMatchesPath,
+  getRoomPicksPath,
 } from "@/lib/rooms";
 import { isNextRedirectError } from "@/lib/is-next-redirect-error";
 import type { RoomSummaryView } from "@/lib/types";
@@ -66,22 +68,32 @@ export function AppShell({ children, user, currentRoom, joinedRooms, rank }: App
     {
       href: getRoomDashboardPath(currentRoom.slug),
       label: "Dashboard",
+      mobileLabel: "Dashboard",
       icon: LayoutDashboard,
-    },
-    {
-      href: getRoomMatchesPath(currentRoom.slug),
-      label: "Matches",
-      icon: CalendarRange,
     },
     {
       href: getRoomLeaderboardPath(currentRoom.slug),
       label: "Leaderboard",
+      mobileLabel: "Leaderboard",
       icon: Trophy,
+    },
+    {
+      href: getRoomPicksPath(currentRoom.slug),
+      label: "See what others picked",
+      mobileLabel: "Room picks",
+      icon: Users,
     },
     {
       href: getRoomHistoryPath(currentRoom.slug),
       label: "History",
+      mobileLabel: "History",
       icon: History,
+    },
+    {
+      href: getRoomMatchesPath(currentRoom.slug),
+      label: "Matches",
+      mobileLabel: "Matches",
+      icon: CalendarRange,
     },
   ] as const;
   const dashboardHref = getRoomDashboardPath(currentRoom.slug);
@@ -114,28 +126,47 @@ export function AppShell({ children, user, currentRoom, joinedRooms, rank }: App
     <div className="min-h-screen bg-slate-50">
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:flex-nowrap lg:px-8">
-          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3 lg:flex-none">
             <LoadingLink
               href={dashboardHref}
               message="Opening dashboard"
-              className="min-w-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
+              suppressHydrationWarning
+              className="shrink-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-200"
             >
-              <BrandMark compact className="max-w-[7.75rem] sm:max-w-[10.5rem]" />
+              <BrandMark compact className="max-w-[6.75rem] sm:max-w-[9rem] md:max-w-[10rem]" />
             </LoadingLink>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   type="button"
                   variant="outline"
-                  className="h-11 min-w-0 max-w-[11rem] rounded-full border-slate-200 bg-white px-3 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:max-w-[16rem] sm:px-4"
+                  suppressHydrationWarning
+                  className="h-11 w-[7.5rem] shrink-0 justify-between rounded-full border-slate-200 bg-white px-3 text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:w-[8.5rem] sm:px-4"
                 >
-                  <span className="truncate">{currentRoom.name}</span>
+                  <span suppressHydrationWarning className="truncate">
+                    Your room
+                  </span>
                   <ChevronDown className="size-4 shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-72 rounded-2xl border-slate-200 bg-white p-2">
+              <DropdownMenuContent
+                align="start"
+                className="w-[min(22rem,calc(100vw-1.5rem))] rounded-2xl border-slate-200 bg-white p-2"
+              >
+                <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+                    Current room
+                  </p>
+                  <p className="mt-2 break-words text-sm font-medium text-slate-900">
+                    {currentRoom.name}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {currentRoom.memberCount} member{currentRoom.memberCount === 1 ? "" : "s"}
+                  </p>
+                </div>
+                <DropdownMenuSeparator className="my-2 bg-slate-200" />
                 <DropdownMenuLabel className="px-2 py-2 text-slate-500">
-                  Your rooms
+                  Switch rooms
                 </DropdownMenuLabel>
                 {joinedRooms.map((room) => (
                   <DropdownMenuItem
@@ -151,7 +182,9 @@ export function AppShell({ children, user, currentRoom, joinedRooms, rank }: App
                   >
                     <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="truncate font-medium">{room.name}</p>
+                        <p className="break-words text-sm font-medium leading-5 text-inherit">
+                          {room.name}
+                        </p>
                         <p className="text-xs text-slate-500">
                           {room.memberCount} member{room.memberCount === 1 ? "" : "s"}
                         </p>
@@ -307,7 +340,7 @@ export function AppShell({ children, user, currentRoom, joinedRooms, rank }: App
       </main>
 
       <nav className="fixed inset-x-4 bottom-4 z-40 rounded-3xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-200/80 lg:hidden">
-        <div className="grid grid-cols-4 gap-2">
+        <div className="grid grid-cols-5 gap-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = pathname.startsWith(item.href);
@@ -318,14 +351,14 @@ export function AppShell({ children, user, currentRoom, joinedRooms, rank }: App
                 href={item.href}
                 message={`Opening ${item.label.toLowerCase()}`}
                 className={cn(
-                  "flex flex-col items-center gap-1 rounded-2xl px-3 py-2 text-xs transition-colors",
+                  "flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-2 text-[10px] leading-tight transition-colors",
                   active
                     ? "bg-blue-50 text-blue-700"
                     : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
                 )}
               >
                 <Icon className="size-4" />
-                {item.label}
+                <span className="text-center">{item.mobileLabel}</span>
               </LoadingLink>
             );
           })}

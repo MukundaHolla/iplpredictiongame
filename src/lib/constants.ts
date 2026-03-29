@@ -8,8 +8,9 @@ export const APP_PATHS_TO_REVALIDATE = [
   "/join-room",
   "/rooms",
   "/dashboard",
-  "/matches",
   "/leaderboard",
+  "/picks",
   "/history",
+  "/matches",
   "/admin",
 ] as const;

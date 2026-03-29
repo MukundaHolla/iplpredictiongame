@@ -16,13 +16,14 @@ export async function getIntegrationModules() {
   process.env.ALLOWLIST_ENABLED = process.env.ALLOWLIST_ENABLED ?? "false";
   process.env.ADMIN_EMAILS = process.env.ADMIN_EMAILS ?? "admin@example.com";
 
-  const [{ db }, systemService, leaderboardService, predictionRepo, adminService] =
+  const [{ db }, systemService, leaderboardService, predictionRepo, adminService, queryService] =
     await Promise.all([
       import("@/lib/db"),
       import("@/server/services/system-service"),
       import("@/server/services/leaderboard-service"),
       import("@/server/repositories/prediction-repository"),
       import("@/server/services/admin-service"),
+      import("@/server/services/query-service"),
     ]);
 
   return {
@@ -33,6 +34,7 @@ export async function getIntegrationModules() {
     settleFixtureResult: adminService.settleFixtureResult,
     removeRoomMember: adminService.removeRoomMember,
     restoreRoomMember: adminService.restoreRoomMember,
+    getTodayRoomPicksView: queryService.getTodayRoomPicksView,
   };
 }
 

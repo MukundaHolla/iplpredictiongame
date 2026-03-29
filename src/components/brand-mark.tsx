@@ -9,7 +9,10 @@ type BrandMarkProps = {
 
 export function BrandMark({ compact = false, className }: BrandMarkProps) {
   return (
-    <div className={cn("flex min-w-0 items-center gap-3", compact && "gap-2", className)}>
+    <div
+      suppressHydrationWarning
+      className={cn("flex min-w-0 items-center gap-3", compact && "gap-2", className)}
+    >
       <div
         className={cn(
           "flex shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-slate-950/95 px-2 py-2 shadow-sm shadow-slate-200/70",

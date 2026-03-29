@@ -8,7 +8,7 @@ import {
   type User,
 } from "@prisma/client";
 
-import { formatMatchDateTime, isSameIstDate } from "@/lib/time";
+import { formatMatchDateTime, getIstDateKey, isSameIstDate } from "@/lib/time";
 
 export type MatchWithOutcome = Pick<
   Match,
@@ -126,8 +126,8 @@ export function canRevealAggregate(
   return Boolean(match.settledAt);
 }
 
-export function canRevealIndividualPicks(match: MatchWithOutcome) {
-  return Boolean(match.settledAt);
+export function canRevealIndividualPicks(match: MatchWithOutcome, now = new Date()) {
+  return getIstDateKey(now) >= getIstDateKey(match.startTimeUtc);
 }
 
 export function isPredictableSettledMatch(match: MatchWithOutcome) {

@@ -20,6 +20,10 @@ export function getRoomLeaderboardPath(roomSlug: string) {
   return `/rooms/${roomSlug}/leaderboard`;
 }
 
+export function getRoomPicksPath(roomSlug: string) {
+  return `/rooms/${roomSlug}/picks`;
+}
+
 export function getRoomHistoryPath(roomSlug: string) {
   return `/rooms/${roomSlug}/history`;
 }
@@ -39,9 +43,10 @@ export function getRoomAdminResultsPath(roomSlug: string) {
 export function getRoomScopedPaths(roomSlug: string) {
   return [
     getRoomDashboardPath(roomSlug),
-    getRoomMatchesPath(roomSlug),
     getRoomLeaderboardPath(roomSlug),
+    getRoomPicksPath(roomSlug),
     getRoomHistoryPath(roomSlug),
+    getRoomMatchesPath(roomSlug),
     getRoomAdminOverviewPath(roomSlug),
     getRoomAdminMatchesPath(roomSlug),
     getRoomAdminResultsPath(roomSlug),
