@@ -19,8 +19,8 @@ export default async function RoomPicksPage({
     <div className="space-y-8 pb-24 lg:pb-8">
       <SectionHeader
         eyebrow="Room picks"
-        title="See what others picked"
-        description="Today’s matches only. Track what everyone in this room has selected before the cutoff."
+        title="Room picks"
+        description="Today’s matches only. See what everyone in this room has picked before the cutoff."
       />
 
       {roomPicks.matches.length > 0 ? (

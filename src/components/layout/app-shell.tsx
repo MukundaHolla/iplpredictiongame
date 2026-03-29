@@ -79,7 +79,7 @@ export function AppShell({ children, user, currentRoom, joinedRooms, rank }: App
     },
     {
       href: getRoomPicksPath(currentRoom.slug),
-      label: "See what others picked",
+      label: "Room picks",
       mobileLabel: "Room picks",
       icon: Users,
     },

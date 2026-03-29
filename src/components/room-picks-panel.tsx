@@ -56,7 +56,7 @@ export function RoomPicksPanel({
         >
           <span className="inline-flex items-center gap-2 text-sm font-medium">
             <Users className="size-4" />
-            {isOpen ? "Hide room picks" : "See what others picked"}
+            {isOpen ? "Hide room picks" : "Show room picks"}
           </span>
           {isOpen ? <ChevronUp className="size-4" /> : <ChevronDown className="size-4" />}
         </Button>
