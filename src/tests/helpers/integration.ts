@@ -34,6 +34,7 @@ export async function getIntegrationModules() {
     settleFixtureResult: adminService.settleFixtureResult,
     removeRoomMember: adminService.removeRoomMember,
     restoreRoomMember: adminService.restoreRoomMember,
+    getRoomPicksView: queryService.getRoomPicksView,
     getTodayRoomPicksView: queryService.getTodayRoomPicksView,
   };
 }

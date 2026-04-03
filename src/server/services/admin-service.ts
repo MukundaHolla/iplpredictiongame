@@ -2,8 +2,9 @@ import { MatchStage, MatchStatus } from "@prisma/client";
 
 import seedData from "../../../prisma/seed-data/ipl-2026.json";
 import type { AdminRoomMemberView } from "@/lib/types";
-import { calculateCutoffTime, parseIstDateTimeInput } from "@/lib/time";
+import { getEffectiveMatchStatus } from "@/lib/game";
 import { slugifyRoomName } from "@/lib/rooms";
+import { calculateCutoffTime, getIstDateKey, parseIstDateTimeInput } from "@/lib/time";
 import {
   adminAllowlistRemoveSchema,
   adminAllowlistToggleSchema,
@@ -43,6 +44,55 @@ async function getRoomOrThrow(roomSlug: string) {
   }
 
   return room;
+}
+
+function getAdminMatchPriority(
+  match: Awaited<ReturnType<typeof matchRepository.listMatches>>[number],
+  now: Date,
+) {
+  const effectiveStatus = getEffectiveMatchStatus(match, now);
+  const isUnsettled =
+    effectiveStatus === MatchStatus.SCHEDULED ||
+    effectiveStatus === MatchStatus.LOCKED ||
+    effectiveStatus === MatchStatus.LIVE;
+  const isToday = getIstDateKey(now) === getIstDateKey(match.startTimeUtc);
+
+  if (isUnsettled && isToday) {
+    return 0;
+  }
+
+  if (isUnsettled) {
+    return 1;
+  }
+
+  return 2;
+}
+
+function sortAdminMatches(
+  matches: Awaited<ReturnType<typeof matchRepository.listMatches>>,
+  now: Date,
+) {
+  return [...matches].sort((left, right) => {
+    const leftPriority = getAdminMatchPriority(left, now);
+    const rightPriority = getAdminMatchPriority(right, now);
+
+    if (leftPriority !== rightPriority) {
+      return leftPriority - rightPriority;
+    }
+
+    if (leftPriority === 0) {
+      return left.startTimeUtc.getTime() - right.startTimeUtc.getTime();
+    }
+
+    if (leftPriority === 1) {
+      return (
+        Math.abs(left.startTimeUtc.getTime() - now.getTime()) -
+        Math.abs(right.startTimeUtc.getTime() - now.getTime())
+      );
+    }
+
+    return right.startTimeUtc.getTime() - left.startTimeUtc.getTime();
+  });
 }
 
 function toAdminRoomMemberView(
@@ -498,5 +548,7 @@ export async function getAdminRoomOverviewData(roomSlug: string) {
 export async function getAdminMatchesData(roomSlug: string) {
   await ensureSystemReady();
   await getRoomOrThrow(roomSlug);
-  return matchRepository.listMatches();
+  const now = new Date();
+  const matches = await matchRepository.listMatches();
+  return sortAdminMatches(matches, now);
 }

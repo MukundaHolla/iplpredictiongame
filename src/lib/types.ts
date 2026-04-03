@@ -90,7 +90,8 @@ export type RoomsHomeView = {
 
 export type RoomPicksView = {
   room: RoomSummaryView;
-  matches: MatchCardView[];
+  todayMatches: MatchCardView[];
+  pastMatches: MatchCardView[];
 };
 
 export type LeaderboardRowView = {

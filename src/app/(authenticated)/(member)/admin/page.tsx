@@ -1,4 +1,4 @@
-import { Activity, ArrowRight, CalendarClock, Layers3, ShieldCheck, Trophy } from "lucide-react";
+import { Activity, ArrowRight, CalendarClock, Home, Layers3, ShieldCheck, Trophy } from "lucide-react";
 
 import { AdminConfigPanel } from "@/components/admin/admin-config-panel";
 import { RoomManagementPanel } from "@/components/admin/room-management-panel";
@@ -6,7 +6,12 @@ import { LoadingLink } from "@/components/navigation/loading-link";
 import { SectionHeader } from "@/components/section-header";
 import { Button } from "@/components/ui/button";
 import { requireGlobalAdminUser } from "@/lib/access";
-import { getRoomAdminMatchesPath, getRoomAdminOverviewPath, getRoomAdminResultsPath } from "@/lib/rooms";
+import {
+  getRoomAdminMatchesPath,
+  getRoomAdminOverviewPath,
+  getRoomAdminResultsPath,
+  getRoomDashboardPath,
+} from "@/lib/rooms";
 import { getAdminOverviewData } from "@/server/services/admin-service";
 import { getRoomStateForUser } from "@/server/services/membership-service";
 
@@ -15,6 +20,7 @@ export default async function AdminOverviewPage() {
   const data = await getAdminOverviewData();
   const roomState = await getRoomStateForUser(user.id);
   const currentRoom = roomState.room;
+  const dashboardHref = currentRoom ? getRoomDashboardPath(currentRoom.slug) : "/rooms";
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 pb-24 lg:pb-8">
@@ -36,6 +42,16 @@ export default async function AdminOverviewPage() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2 xl:w-[24rem]">
+            <Button
+              asChild
+              variant="outline"
+              className="h-12 rounded-2xl border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:col-span-2"
+            >
+              <LoadingLink href={dashboardHref} message="Going back to the dashboard">
+                <Home className="size-4" />
+                Back to dashboard
+              </LoadingLink>
+            </Button>
             <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3">
               <p className="text-xs uppercase tracking-[0.22em] text-slate-500">Rooms</p>
               <p className="mt-2 font-heading text-3xl text-slate-900">{data.rooms.length}</p>

@@ -203,6 +203,26 @@ async function getRoomMatchCardsForUser(
   );
 }
 
+function groupRoomPicksMatches(matchCards: MatchCardView[], now: Date) {
+  const todayKey = getIstDateKey(now);
+  const visibleMatches = matchCards.filter((match) => match.showRoomPicksDisclosure);
+
+  return {
+    todayMatches: visibleMatches
+      .filter((match) => getIstDateKey(new Date(match.startTimeUtc)) === todayKey)
+      .sort(
+        (left, right) =>
+          new Date(left.startTimeUtc).getTime() - new Date(right.startTimeUtc).getTime(),
+      ),
+    pastMatches: visibleMatches
+      .filter((match) => getIstDateKey(new Date(match.startTimeUtc)) < todayKey)
+      .sort(
+        (left, right) =>
+          new Date(right.startTimeUtc).getTime() - new Date(left.startTimeUtc).getTime(),
+      ),
+  };
+}
+
 export async function getDashboardView(userId: string, roomSlug: string): Promise<DashboardView> {
   const { room, membership, memberships, config, user } = await getRoomContextForUser(
     userId,
@@ -357,7 +377,7 @@ export async function getLeaderboardView(userId: string, roomSlug: string) {
   return getLeaderboardRows(room.id);
 }
 
-export async function getTodayRoomPicksView(
+export async function getRoomPicksView(
   userId: string,
   roomSlug: string,
 ): Promise<RoomPicksView> {
@@ -371,7 +391,6 @@ export async function getTodayRoomPicksView(
   }
 
   const now = new Date();
-  const todayKey = getIstDateKey(now);
   const joinedRooms = await getJoinedRoomSummaries(memberships);
   const currentRoom = joinedRooms.find((joinedRoom) => joinedRoom.id === room.id);
 
@@ -379,25 +398,32 @@ export async function getTodayRoomPicksView(
     throw new Error("Room membership is missing from the available rooms list.");
   }
 
-  const matches = (await getRoomMatchCardsForUser(
-    userId,
-    room.id,
-    config.predictionsRevealMode,
+  const groupedMatches = groupRoomPicksMatches(
+    await getRoomMatchCardsForUser(
+      userId,
+      room.id,
+      config.predictionsRevealMode,
+      now,
+    ),
     now,
-  ))
-    .filter(
-      (match) =>
-        match.showRoomPicksDisclosure &&
-        getIstDateKey(new Date(match.startTimeUtc)) === todayKey,
-    )
-    .sort(
-      (left, right) =>
-        new Date(left.startTimeUtc).getTime() - new Date(right.startTimeUtc).getTime(),
-    );
+  );
 
   return {
     room: currentRoom,
-    matches,
+    ...groupedMatches,
+  };
+}
+
+export async function getTodayRoomPicksView(
+  userId: string,
+  roomSlug: string,
+): Promise<RoomPicksView> {
+  const view = await getRoomPicksView(userId, roomSlug);
+
+  return {
+    room: view.room,
+    todayMatches: view.todayMatches,
+    pastMatches: [],
   };
 }
 

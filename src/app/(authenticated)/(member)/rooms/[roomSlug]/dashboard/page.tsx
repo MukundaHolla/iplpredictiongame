@@ -3,6 +3,8 @@ import { MatchCard } from "@/components/match-card";
 import { LoadingLink } from "@/components/navigation/loading-link";
 import { SectionHeader } from "@/components/section-header";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 import { requireRoomMemberUser } from "@/lib/access";
 import { getRoomLeaderboardPath } from "@/lib/rooms";
 import { getDashboardView } from "@/server/services/query-service";
@@ -29,45 +31,94 @@ export default async function RoomDashboardPage({
   return (
     <div className="space-y-8 pb-24 lg:pb-8">
       <section className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_220px]">
-        <div className="surface-card flex flex-col gap-3 p-4 sm:p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className="rounded-full border border-blue-100 bg-blue-50 text-blue-700">
-              Dashboard
-            </Badge>
-            <Badge className="rounded-full border border-slate-200 bg-slate-50 text-slate-700">
-              {dashboard.room.name} private room
-            </Badge>
-            <Badge className="rounded-full border border-slate-200 bg-slate-50 text-slate-700">
-              Reveal {dashboard.revealMode.replaceAll("_", " ")}
-            </Badge>
+        <details className="surface-card group rounded-3xl p-4 sm:p-5">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <Badge className="rounded-full border border-blue-100 bg-blue-50 text-blue-700">
+                Dashboard
+              </Badge>
+              <Badge className="rounded-full border border-slate-200 bg-slate-50 text-slate-700">
+                {dashboard.room.name}
+              </Badge>
+              <Badge className="rounded-full border border-slate-200 bg-slate-50 text-slate-700">
+                Reveal {dashboard.revealMode.replaceAll("_", " ")}
+              </Badge>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600">
+              Details
+              <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+            </span>
+          </summary>
+
+          <div className="mt-4 border-t border-slate-200 pt-4 text-sm leading-6 text-slate-600">
+            This room stays focused on today&apos;s fixtures first. Picks open on the day of the
+            match, can be changed until the cutoff, and room reveal details are always here when
+            you want the extra context.
           </div>
-          <p className="text-sm leading-6 text-slate-600">
-            Today&apos;s matches appear first. Picks open on the day of the match and can be
-            changed until each cutoff.
-          </p>
-        </div>
+        </details>
+
+        <details className="surface-card group rounded-3xl p-4 xl:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
+            <div className="min-w-0 space-y-1">
+              <p className="font-heading text-xs uppercase tracking-[0.24em] text-blue-600">
+                Current Rank
+              </p>
+              <p className="font-heading text-2xl text-slate-900">
+                {dashboard.myRank ? `#${dashboard.myRank}` : "—"}
+              </p>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600">
+              Details
+              <ChevronDown className="size-4 transition-transform group-open:rotate-180" />
+            </span>
+          </summary>
+
+          <div className="mt-4 space-y-3 border-t border-slate-200 pt-4">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Players</p>
+              <p className="mt-1 text-sm font-medium leading-5 text-slate-800">
+                You&apos;re competing with {dashboard.room.memberCount}{" "}
+                {dashboard.room.memberCount === 1 ? "person" : "people"} in this room
+              </p>
+            </div>
+            <Button
+              asChild
+              variant="outline"
+              className="w-full rounded-2xl border-slate-200 bg-white text-slate-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+            >
+              <LoadingLink
+                href={getRoomLeaderboardPath(roomSlug)}
+                message="Opening leaderboard"
+              >
+                Open leaderboard
+              </LoadingLink>
+            </Button>
+          </div>
+        </details>
 
         <LoadingLink
           href={getRoomLeaderboardPath(roomSlug)}
           message="Opening leaderboard"
-          className="surface-card interactive-surface flex h-full flex-col justify-between rounded-3xl p-4 sm:p-5"
+          className="surface-card interactive-surface hidden h-full flex-col justify-between rounded-3xl p-4 xl:flex"
         >
-          <div>
+          <div className="space-y-3">
             <p className="font-heading text-xs uppercase tracking-[0.24em] text-blue-600">
               Current Rank
             </p>
-            <p className="mt-2 font-heading text-4xl text-slate-900">
+            <p className="font-heading text-3xl text-slate-900">
               {dashboard.myRank ? `#${dashboard.myRank}` : "—"}
             </p>
-            <div className="mt-4 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500">Players</p>
-              <p className="mt-1 text-sm font-medium text-slate-800">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Players</p>
+              <p className="mt-1 text-sm font-medium leading-5 text-slate-800">
                 You&apos;re competing with {dashboard.room.memberCount}{" "}
                 {dashboard.room.memberCount === 1 ? "person" : "people"} in this room
               </p>
             </div>
           </div>
-          <p className="mt-3 text-sm text-slate-500">Tap to open the leaderboard</p>
+          <p className="mt-3 text-xs uppercase tracking-[0.18em] text-slate-500">
+            Open leaderboard
+          </p>
         </LoadingLink>
       </section>
 
